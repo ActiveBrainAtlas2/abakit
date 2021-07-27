@@ -1,0 +1,31 @@
+name: deploy-docs-actions
+
+on:
+  push:
+    branches:
+      - main
+
+# Actions references:
+# - https://github.com/marketplace/actions/setup-miniconda
+# - https://github.com/marketplace/actions/github-pages-action
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: dev/environment.yml
+
+      - name: Build doc
+        shell: bash -l {0}
+        run: make doc
+
+      - name: Deploy doc
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html

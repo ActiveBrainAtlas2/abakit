@@ -1,0 +1,31 @@
+# https://setuptools.readthedocs.io/en/latest/userguide/quickstart.html#basic-use
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# https://black.readthedocs.io/en/stable/pyproject_toml.html
+
+[tool.black]
+line-length = 79
+
+# http://pylint.pycqa.org/en/latest/whatsnew/2.5.html#other-changes
+# https://github.com/PyCQA/pylint/blob/master/pylintrc
+
+[tool.pylint.BASIC]
+variable-rgx = "[a-z_][a-z0-9_]{0,30}$"
+
+[tool.pylint.FORMAT]
+max-line-length = 79
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    "not-callable",
+    "too-many-locals",
+]
+
+[tool.pylint.TYPECHECK]
+generated-members = [
+    "numpy.*",
+    "torch.*",
+]
