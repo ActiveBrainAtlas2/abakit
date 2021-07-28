@@ -25,7 +25,7 @@ class LinearTransform(Transform):
     def get_translation(self):
         """Get the translation vector."""
         affine_matrix = self._transform.get_matrix()
-        return affine_matriz[0, 3, :3].numpy()
+        return affine_matrix[0, 3, :3].numpy()
 
 
 class LandmarkRigidTransform(LinearTransform):
@@ -63,7 +63,7 @@ class LandmarkRigidTransform(LinearTransform):
     def get_translation(self):
         """Get the translation vector."""
         affine_matrix = self._transform.get_matrix()
-        return affine_matriz[0, 3, :3].numpy()
+        return affine_matrix[0, 3, :3].numpy()
 
     def forward(self, moving_landmark):
         return self._transform.transform_points(moving_landmark)

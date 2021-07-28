@@ -1,24 +1,14 @@
-import sys
 import cv2
 import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.figure
-#from nipy.labs.mask import compute_mask
-from skimage import exposure
-from pathlib import Path
-from scipy.ndimage.interpolation import map_coordinates
-from skimage.exposure import rescale_intensity, adjust_gamma
+from skimage import exposure, io
 
-PIPELINE_ROOT = Path('.').absolute().parent
-sys.path.append(PIPELINE_ROOT.as_posix())
-
-from utilities.utilities_process import get_last_2d
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 fontScale = 1
 thickness = 2
-
 
 def rotate_image(img, file, rotation):
     """
@@ -110,8 +100,8 @@ def fix_with_blob(img):
     :return:
     """
     no_strip, _ = remove_strip(img)
-    #clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(12, 12))
-    #no_strip = clahe.apply(no_strip)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(12, 12))
+    no_strip = clahe.apply(no_strip)
     #no_strip = img.copy()
     ###### Threshold it so it becomes binary
     threshold = find_threshold(no_strip)
@@ -144,45 +134,6 @@ def fix_with_blob(img):
     mask = cv2.morphologyEx(blob, cv2.MORPH_CLOSE, kernel10, iterations=5)
     return mask
 
-
-def make_mask(img):
-    img = get_last_2d(img)
-    no_strip, fe = remove_strip(img)
-
-    # Threshold it so it becomes binary
-    min_value, threshold = find_threshold(img)
-    # threshold = 272
-    ret, threshed = cv2.threshold(no_strip, threshold, 255, cv2.THRESH_BINARY)
-    threshed = np.uint8(threshed)
-
-    # Find connected elements
-    # You need to choose 4 or 8 for connectivity type
-    connectivity = 4
-    output = cv2.connectedComponentsWithStats(threshed, connectivity, cv2.CV_32S)
-    # Get the results
-    # The first cell is the number of labels
-    num_labels = output[0]
-    # The second cell is the label matrix
-    labels = output[1]
-    # The third cell is the stat matrix
-    stats = output[2]
-    # The fourth cell is the centroid matrix
-    centroids = output[3]
-    # Find the blob that corresponds to the section.
-    row = find_main_blob(stats, img)
-    blob_label = row[1]['blob_label']
-    # extract the blob
-    blob = np.uint8(labels == blob_label) * 255
-    # Perform morphological closing
-    kernel10 = np.ones((10, 10), np.uint8)
-    closing = cv2.morphologyEx(blob, cv2.MORPH_CLOSE, kernel10, iterations=5)
-    del blob
-    if fe != 0:
-        img[:, fe:] = 0  # mask the strip
-    # scale and mask
-    scaled, _max = scale_and_mask(img, closing)
-
-    return closing, scaled
 
 
 def place_image(img, file, max_width, max_height, bgcolor=None):
@@ -223,7 +174,7 @@ def place_image(img, file, max_width, max_height, bgcolor=None):
         except:
             print('Could not place {} with width:{}, height:{} in {}x{}'
                   .format(file, img.shape[1], img.shape[0], max_width, max_height))
-
+    del img
     return new_img.astype(dt)
 
 
@@ -255,7 +206,7 @@ def check_contour(contours, area, lc):
         return contours, lc
 
 
-def scaled(img, mask, limit, epsilon=0.01):
+def scaled(img, mask, scale=45000, epsilon=0.01):
     """
     This scales the image to the limit specified. You can get this value
     by looking at the combined histogram of the image stack. It is quite
@@ -268,24 +219,17 @@ def scaled(img, mask, limit, epsilon=0.01):
     """
     _max = np.quantile(img[mask > 10], 1 - epsilon) # gets almost the max value of img
     # print('thr=%d, index=%d'%(vals[ind],index))
-    _range = 2 ** 16 - 1 # 16bit
-    scaled = img * (limit / _max) # scale the image from original values to e.g., 30000/10000
-    del img
+    if scale > 255:
+        _range = 2 ** 16 - 1 # 16bit
+        data_type = np.uint16
+    else:
+        _range = 2 ** 256 - 1 # 8bit
+        data_type = np.uint8        
+    scaled = img * (scale / _max) # scale the image from original values to e.g., 30000/10000
     scaled[scaled > _range] = _range # if values are > 16bit, set to 16bit
     scaled = scaled * (mask > 10) # just work on the non masked values
-    return scaled.astype(np.uint16)
-
-def equalized(fixed):
-    """
-    Takes an image that has already been scaled and uses opencv adaptive histogram
-    equalization. This cases uses 10 as the clip limit and splits the image into 8 rows
-    and 8 columns
-    :param fixed: image we are working on
-    :return: a better looking image
-    """
-    clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8, 8))
-    fixed = clahe.apply(fixed)
-    return fixed
+    del img
+    return scaled.astype(data_type)
 
 
 def trim_edges(img):
@@ -306,13 +250,18 @@ def trim_edges(img):
     img = clahe.apply(img)
     h_src = img.copy()
     limit = img_shape[1] // 12
-    threshold = 44
+    thresh1 = np.quantile(img[img > 0], 0.75)
+    thresh2 = np.median(img)
+    threshold = int(min(thresh1, thresh2))
+
     # trim left
-    for i in range(0,limit):
+    """
+    for i in range(0,limit//2):
         b = h_src[:,i]
         m = np.mean(b)
         if m <= threshold:
             h_src[:,i] = 0
+    """
     # trim right
     for i in range(img_shape[1]-limit,img_shape[1]):
         b = h_src[:,i]
@@ -337,7 +286,6 @@ def trim_edges(img):
             h_src[i,:] = 0
 
     return h_src
-
 
 
 def fix_with_fill(img, debug=False):
@@ -583,6 +531,20 @@ def find_contour_count(img):
     contours, hierarchy = cv2.findContours(img.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     return len(contours)
 
+
+def equalized(fixed):
+    """
+    Takes an image that has already been scaled and uses opencv adaptive histogram
+    equalization. This cases uses 10 as the clip limit and splits the image into 8 rows
+    and 8 columns
+    :param fixed: image we are working on
+    :return: a better looking image
+    """
+    clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8, 8))
+    fixed = clahe.apply(fixed)
+    return fixed
+
+
 def get_binary_mask(img):
     '''
     img: numpy 8 bit 2 dimension array
@@ -590,17 +552,97 @@ def get_binary_mask(img):
     2. get opencv OTSUs threshold,
     3. open/close with opencv
     '''
-    kernel_size = (199, 199)
-    normed = equalized(img)
-
-    blurred_img = cv2.GaussianBlur(normed, kernel_size, 0)
-    gray_img = blurred_img.copy()
+    #normed = exposure.adjust_gamma(normed, 2)
+    #normed = exposure.adjust_log(normed)
+    # get rid of glue and normalize
+    thresh1 = np.quantile(img[img > 0], 0.75)
+    thresh2 = np.median(img)
+    thresh = int(min(thresh1, thresh2))
+    #img[img < 20] = 0
+    # size of 121 gives smooth outline and also captures almost
+    # all the detail
+    kernel_size = (21, 21) 
+    img = cv2.GaussianBlur(img, kernel_size, 250)
     thresh = 80  # initial value, but OTSU calculates it
-    ret, otsu = cv2.threshold(gray_img, thresh, 255,
-                              cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    ksize = 50
+    ret, otsu = cv2.threshold(img, thresh, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    ksize = 100
     kernel = np.ones((ksize, ksize), np.uint8)
     closed_mask = cv2.morphologyEx(otsu, cv2.MORPH_CLOSE, kernel)
+
     return closed_mask
 
 
+
+def fix_thion(infile, mask, maskfile, logger, rotation, flip, max_width, max_height):
+    """
+    This method clean all thionin images. Note that the thionin have 3 channels combined into one.
+    :param infile: file path of image
+    :param mask: binary mask image of the image
+    :param maskfile: file path of mask
+    :param ROTATED_MASKS: location of rotated masks
+    :param logger: logger to keep track of things
+    :param rotation: amount of rotation. 1 = rotate by 90degrees
+    :param flip: either flip or flop
+    :param max_width: width of image
+    :param max_height: height of image
+    :return: cleaned and rotated image
+    """
+    try:
+        imgfull = io.imread(infile)
+    except:
+        logger.warning(f'Could not open {infile}')
+
+    img_ch1 = imgfull[:, :, 0]
+    img_ch2 = imgfull[:, :, 1]
+    img_ch3 = imgfull[:, :, 2]
+    fixed1 = cv2.bitwise_and(img_ch1, img_ch1, mask=mask)
+    fixed2 = cv2.bitwise_and(img_ch2, img_ch2, mask=mask)
+    fixed3 = cv2.bitwise_and(img_ch3, img_ch3, mask=mask)
+    del img_ch1
+    del img_ch2
+    del img_ch3
+
+    if rotation > 0:
+        fixed1 = rotate_image(fixed1, infile, rotation)
+        fixed2 = rotate_image(fixed2, infile, rotation)
+        fixed3 = rotate_image(fixed3, infile, rotation)
+        mask = rotate_image(mask, maskfile, rotation)
+
+    if flip == 'flip':
+        fixed1 = np.flip(fixed1)
+        fixed2 = np.flip(fixed2)
+        fixed3 = np.flip(fixed3)
+        mask = np.flip(mask)
+    if flip == 'flop':
+        fixed1 = np.flip(fixed1, axis=1)
+        fixed2 = np.flip(fixed2, axis=1)
+        fixed3 = np.flip(fixed3, axis=1)
+        mask = np.flip(mask, axis=1)
+
+    fixed = np.dstack((fixed1, fixed2, fixed3))
+    return fixed
+
+
+def merge_mask(image, mask):
+    b = mask
+    g = image
+    r = np.zeros_like(image).astype(np.uint8)
+    merged = np.stack([r, g, b], axis=2)
+    return merged
+
+def combine_dims(a):
+    if a.shape[0] > 0:
+        a1 = a[0,:,:]
+        a2 = a[1,:,:]
+        a3 = np.add(a1,a2)
+    else:
+        a3 = np.zeros([a.shape[1], a.shape[2]]) + 255
+    return a3
+
+def greenify_mask(image):
+    r = np.zeros_like(image).astype(np.uint8)
+    g = np.zeros_like(image).astype(np.uint8)
+    b = np.zeros_like(image).astype(np.uint8)
+    r[image == 1], g[image == 1], b[image == 1] = [0,255,0]
+    coloured_mask = np.stack([r, g, b], axis=2)
+    return coloured_mask
