@@ -1,5 +1,4 @@
 """Transformations."""
-import numpy as np
 import torch
 from pytorch3d.transforms import RotateAxisAngle
 from pytorch3d.transforms import Scale

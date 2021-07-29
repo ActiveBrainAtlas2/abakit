@@ -31,7 +31,10 @@ def umeyama(src, dst, with_scaling=True):
     r = u @ np.diag(e) @ vh
 
     if with_scaling:
-        src_var = (srcscanRun = ScanRun.objects.get(
+        src_var = (src_demean ** 2).sum(axis=0).mean()
+        c = sum(s * e) / src_var
+        r *= c
+
     t = dst_mean - r @ src_mean
 
     return r, t

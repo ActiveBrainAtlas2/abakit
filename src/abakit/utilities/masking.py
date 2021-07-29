@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.figure
-from skimage import exposure, io
+from skimage import io
 
 
 font = cv2.FONT_HERSHEY_SIMPLEX
