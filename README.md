@@ -3,6 +3,8 @@
 ## Installation
 
 - `git clone` this repo.
+- Go into the repo. Make sure you are within your virtual environment.
+- do `python -m build` 
 - `pip install . --extra-index-url --trusted-host` in this directory to install in develop mode.
 
 ## Usage
