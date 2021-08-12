@@ -3,7 +3,7 @@
 ## Installation
 
 - `git clone` this repo.
-- `pip install -e .` in this directory to install in develop mode.
+- `pip install . --extra-index-url --trusted-host` in this directory to install in develop mode.
 
 ## Usage
 
