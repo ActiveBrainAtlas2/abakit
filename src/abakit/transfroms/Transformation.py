@@ -1,11 +1,9 @@
 import SimpleITK as sitk
 import numpy as np
 import matplotlib as plt
+from scipy.ndimage.interpolation import affine_transform
 
 class Transformation:
-    def __init__():
-        ...
-
     def set_fixed_and_moving_points(self,fixed,moving):
         self.fixed = fixed
         self.moving = moving
@@ -34,31 +32,15 @@ class Transformation:
         self.rigid_transform = self.find_transform_of_type(sitk.VersorRigid3DTransform())
         self.inverse_rigid_transform = self.rigid_transform.GetInverse()
 
+    def get_affine_transform(self):
+        if not hasattr(self,'affine_transform'):
+            self.find_affine_transform()
+        return self.affine_transform
+    
+    def get_rigid_transform(self):
+        if not hasattr(self,'rigid_transform'):
+            self.find_rigid_transform()
+        return self.rigid_transform
+
     def find_transform_of_type(self,transform_type):
         return sitk.LandmarkBasedTransformInitializer(transform_type,list(self.fixed.flatten()),list(self.moving.flatten()))
-
-    def visualize_transform(ax,point_set,N,nbrs,m='o',**linestyle):
-        """ plot a 3d rendinring of a grid of points"""
-        x=point_set[:,0]
-        y=point_set[:,1]
-        z=point_set[:,2]
-        ax.scatter(x, y, z, marker=m)
-
-        _coor=np.zeros([2,3])
-        for i,j,color in nbrs:
-            _coor[0,:]=point_set[i,:]
-            _coor[1,:]=point_set[j,:]
-            x=list(_coor[:,0])
-            y=list(_coor[:,1])
-            z=list(_coor[:,2])
-            #print(i,j,a[i,:],a[j,:],color,x,y,z)
-            ax.plot(x,y,z,color,**linestyle)
-
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
-
-        xline=np.zeros([N])
-        yline=np.zeros([N])
-        zline=np.zeros([N])
-        plt.show()
