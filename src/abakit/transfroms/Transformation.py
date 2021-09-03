@@ -2,6 +2,7 @@ import SimpleITK as sitk
 from SimpleITK.SimpleITK import Transform
 import numpy as np
 import matplotlib as plt
+from scipy.ndimage.interpolation import affine_transform
 
 class Transformation:
 
