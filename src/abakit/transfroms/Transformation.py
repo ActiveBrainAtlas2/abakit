@@ -1,14 +1,26 @@
 import SimpleITK as sitk
+from SimpleITK.SimpleITK import Transform
 import numpy as np
 import matplotlib as plt
 from scipy.ndimage.interpolation import affine_transform
 
 class Transformation:
-    def set_fixed_and_moving_points(self,fixed,moving):
+
+    def __init__(self,fixed,moving):
         self.fixed = fixed
         self.moving = moving
+    
+    def inverse_transform_points(self,points):
+        _ = self.get_inverse_transform()
+        transformed_points = self.transform_points(points,self.inverse_transform.TransformPoint)
+        return transformed_points
+    
+    def forward_transform_points(self,points):
+        _ = self.get_transform()
+        transformed_points = self.transform_points(points,self.transform.TransformPoint)
+        return transformed_points
 
-    def transform_points(transform,points):
+    def transform_points(self,points,tranform_function):
         """Transform a set of points according to a given transformation
         transform: and instance of SimpleITK.SimpleITK.Transform
         points: a numpy array of shape (number of points) X (number of dimensions)
@@ -16,31 +28,29 @@ class Transformation:
         npoints,_=points.shape
         transformed_points=np.zeros(points.shape)
         for pointi in range(npoints):
-            transformed_points[pointi]=transform.TransformPoint(points[pointi,:])
+            transformed_points[pointi]=tranform_function(points[pointi,:])
         return transformed_points
     
-    def plot_difference_between_pointsets(point_set1,point_set2):
-        point_set_difference=(point_set1-point_set2)
-        plt.hist(point_set_difference.flatten(),bins=100)
-        plt.grid()
-
-    def find_affine_transform(self):
-        self.affine_transform = self.find_transform_of_type(sitk.AffineTransform(3))
-        self.inverse_affine_transform = self.affine_transform.GetInverse()
-
-    def find_rigid_transform(self):
-        self.rigid_transform = self.find_transform_of_type(sitk.VersorRigid3DTransform())
-        self.inverse_rigid_transform = self.rigid_transform.GetInverse()
-
-    def get_affine_transform(self):
-        if not hasattr(self,'affine_transform'):
-            self.find_affine_transform()
-        return self.affine_transform
+    def get_transform(self):
+        if not hasattr(self,'transform'):
+            self.transform = sitk.LandmarkBasedTransformInitializer(self.transform_type,
+            list(self.fixed.flatten()),list(self.moving.flatten()))
+            self.inverse_transform = self.transform.GetInverse()
+        return self.transform
     
-    def get_rigid_transform(self):
-        if not hasattr(self,'rigid_transform'):
-            self.find_rigid_transform()
-        return self.rigid_transform
+    def get_inverse_transform(self):
+        if not hasattr(self,'transform'):
+            _ = self.get_transform()
+        if not hasattr(self,'inverse_transform'):
+            self.inverse_transform = self.transform.GetInverse()
+        return self.inverse_transform
 
-    def find_transform_of_type(self,transform_type):
-        return sitk.LandmarkBasedTransformInitializer(transform_type,list(self.fixed.flatten()),list(self.moving.flatten()))
+class AffineTransform(Transform):
+    def __init__(self,fixed,moving):
+        super(AffineTransform, self).__init__(fixed,moving)
+        self.transform_type = sitk.AffineTransform(3)
+
+class RigidTransform(Transform):
+    def __init__(self,fixed,moving):
+        super(RigidTransform, self).__init__(fixed,moving)
+        self.transform_type = sitk.VersorRigid3DTransform()
