@@ -1,4 +1,4 @@
-from algorithm import umeyama
+from .algorithm import umeyama
 import numpy as np
 import copy
 def get_rigid_transformation_from_dicts(com_dict1,com_dict2):
