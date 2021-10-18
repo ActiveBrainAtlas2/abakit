@@ -1,7 +1,6 @@
 import SimpleITK as sitk
 from SimpleITK.SimpleITK import Transform
 import numpy as np
-import matplotlib as plt
 from scipy.ndimage.interpolation import affine_transform
 
 class Transformation:
@@ -9,6 +8,10 @@ class Transformation:
     def __init__(self,fixed,moving):
         self.fixed = fixed
         self.moving = moving
+
+    def transform_moving_image(self):
+        sitk.Resample(self.moving, self.fixed, affine_transform,
+            sitk.sitkLinear, 0.0, self.moving.GetPixelID())
     
     def inverse_transform_points(self,points):
         _ = self.get_inverse_transform()
