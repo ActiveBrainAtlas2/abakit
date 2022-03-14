@@ -9,7 +9,7 @@ class Transformation:
         self.moving = moving
 
     def transform_moving_image(self):
-        sitk.Resample(self.moving, self.fixed, affine_transform,
+        self.transformed_moving = sitk.Resample(self.moving, self.fixed, affine_transform,
             sitk.sitkLinear, 0.0, self.moving.GetPixelID())
     
     def inverse_transform_points(self,points):
@@ -46,13 +46,23 @@ class Transformation:
         if not hasattr(self,'inverse_transform'):
             self.inverse_transform = self.transform.GetInverse()
         return self.inverse_transform
+    
+    def get_fixed_image(self):
+        sitk.GetArrayFromImage(self.fixed)
 
-class AffineTransform(Transform):
+    def get_moving_image(self):
+        sitk.GetArrayFromImage(self.moving)
+    
+    def get_transformed_moving_image(self):
+        assert(hasattr(self,'transform_moving_image'))
+        sitk.GetArrayFromImage(self.transform_moving_image)
+
+class AffineTransform(Transformation):
     def __init__(self,fixed,moving):
         super(AffineTransform, self).__init__(fixed,moving)
         self.transform_type = sitk.AffineTransform(3)
 
-class RigidTransform(Transform):
+class RigidTransform(Transformation):
     def __init__(self,fixed,moving):
         super(RigidTransform, self).__init__(fixed,moving)
         self.transform_type = sitk.VersorRigid3DTransform()
