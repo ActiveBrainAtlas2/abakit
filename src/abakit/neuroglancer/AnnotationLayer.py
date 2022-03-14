@@ -61,7 +61,7 @@ class AnnotationLayer:
 
 class Point:
     def __init__(self,coord,id):
-        self.coord = coord
+        self.coord = np.array(coord)
         self.id = id
         self.type = 'point'
     
@@ -71,8 +71,8 @@ class Point:
 
 class Line:
     def __init__(self,coord_start,coord_end,id):
-        self.coord_start = coord_start
-        self.coord_end = coord_end
+        self.coord_start = np.array(coord_start)
+        self.coord_end = np.array(coord_end)
         self.id = id
         self.type = 'line'
 
