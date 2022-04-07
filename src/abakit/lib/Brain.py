@@ -6,7 +6,7 @@ import numpy as np
 
 class Brain:
 
-    def __init__(self, animal):
+    def __init__(self, animal,*arg,**kwarg):
         self.animal = animal
         self.sqlController = SqlController(self.animal)
         self.path = FileLocationManager(animal)

@@ -7,8 +7,9 @@ from abakit.atlas.Atlas import AtlasInitiator
 
 class Assembler:
 
-    def __init__(self):
-        self.check_attributes(['volumes', 'structures', 'origins'])
+    def __init__(self,check = True,*arg,**kwarg):
+        if check:
+            self.check_attributes(['volumes', 'structures', 'origins'])
 
     def initialize_origins_and_volumes(self):
         if not self.origins == {}:
@@ -58,7 +59,6 @@ class Assembler:
                 self.combined_volume[row_start:row_end, col_start:col_end, z_start:z_end] += volume.astype(np.uint8) * structure_id
             except ValueError as ve:
                 print(structure, ve, volume.shape)
-                breakpoint()
         print('Shape of downsampled atlas volume', self.combined_volume.shape)
     
     def plot_combined_volume(self):
@@ -123,8 +123,8 @@ class Assembler:
 
 class CustomAssembler(Brain, VolumeUtilities, Assembler):
 
-    def __init__(self, animal):
-        Brain.__init__(self, animal)
+    def __init__(self, animal,*arg,**kwarg):
+        Brain.__init__(self, animal,*arg,**kwarg)
         identity = lambda: {}
         self.attribute_functions = dict(
             origins=identity,
@@ -132,7 +132,7 @@ class CustomAssembler(Brain, VolumeUtilities, Assembler):
             structures=self.set_structure, **self.attribute_functions)
         self.volumes = {}
         self.origins = {}
-        Assembler.__init__(self)
+        Assembler.__init__(self,*arg,**kwarg)
     
     def set_structure(self):
         possible_attributes_with_structure_list = ['origins', 'COM', 'volumes']
