@@ -298,7 +298,6 @@ class SqlController(object):
         for structure in rows:
             structures_dict[structure.abbreviation] = [
                 structure.description, structure.color]
-
         return structures_dict
 
     def get_structures_list(self):

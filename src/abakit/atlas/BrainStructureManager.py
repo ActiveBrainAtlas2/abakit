@@ -1,3 +1,4 @@
+from grp import struct_group
 import os
 import json
 from abakit.settings import ATLAS,DATA_PATH
@@ -183,3 +184,10 @@ class BrainStructureManager(Brain, VolumeUtilities):
                 contours[structurei][section_name] = np.vstack(section_contour[structurei])
         return contours
 
+    def get_segment_properties(self,structures_to_include = None):
+        db_structure_infos = self.sqlController.get_structures_dict()
+        if structures_to_include is None:
+            segment_properties = [(number, f'{structure}: {label}') for structure, (label, number) in db_structure_infos.items()]
+        else:
+            segment_properties = [(number, f'{structure}: {label}') for structure, (label, number) in db_structure_infos.items() if structure in structures_to_include]
+        return segment_properties

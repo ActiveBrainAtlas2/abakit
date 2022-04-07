@@ -33,6 +33,7 @@ class FileLocationManager(object):
         self.rotated_and_padded_thumbnail_mask = os.path.join(self.masks, 'thumbnail_rotated_and_padded')
         self.aligned_rotated_and_padded_thumbnail_mask = os.path.join(self.masks, 'thumbnail_aligned_rotated_and_padded')
         self.shell = os.path.join(self.root, stack,'shell')
+        self.segmentation_layer = os.path.join(self.root, 'structures')
     
     def get_full(self,channel=1):
         return os.path.join(self.prep, f'CH{channel}', 'full')
