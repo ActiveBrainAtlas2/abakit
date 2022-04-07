@@ -1,8 +1,8 @@
 import numpy as np
-from atlas.Atlas import BrainStructureManager
-from atlas.VolumeUtilities import VolumeUtilities
-from Brain import Brain
-from atlas.Atlas import AtlasInitiator
+from abakit.atlas.Atlas import BrainStructureManager
+from abakit.atlas.VolumeUtilities import VolumeUtilities
+from abakit.lib.Brain import Brain
+from abakit.atlas.Atlas import AtlasInitiator
 
 
 class Assembler:

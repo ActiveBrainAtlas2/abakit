@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.measurements import center_of_mass
-from atlas.BrainStructureManager import BrainStructureManager
+from abakit.atlas.BrainStructureManager import BrainStructureManager
 
 class VolumeMaker(BrainStructureManager):
     def __init__(self,animal, *args, **kwargs):

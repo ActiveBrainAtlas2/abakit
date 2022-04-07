@@ -1,14 +1,14 @@
 import os
 import json
-from lib.utilities_atlas import ATLAS
+from abakit.settings import ATLAS,DATA_PATH
 import numpy as np
-from Brain import Brain
-from atlas.VolumeUtilities import VolumeUtilities
-from lib.utilities_atlas_lite import volume_to_polygon
-from lib.utilities_atlas_lite import save_mesh
+from abakit.lib.Brain import Brain
+from abakit.atlas.VolumeUtilities import VolumeUtilities
+from abakit.lib.utilities_atlas import volume_to_polygon
+from abakit.lib.utilities_atlas import save_mesh
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from lib.FileLocationManager import DATA_PATH
+from abakit.settings import DATA_PATH
 class BrainStructureManager(Brain, VolumeUtilities):
 
     def __init__(self, animal,atlas = ATLAS,downsample_factor = 32):
