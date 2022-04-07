@@ -15,12 +15,12 @@ from taskqueue import LocalTaskQueue
 import igneous.task_creation as tc
 from cloudvolume import CloudVolume
 from pathlib import Path
-
+from abakit.settings import DATA_PATH
 PIPELINE_ROOT = Path('./src').absolute()
 sys.path.append(PIPELINE_ROOT.as_posix())
 
 
-from lib.SqlController import SqlController
+from abakit.lib.SqlController import SqlController
 
 RESOLUTION = 0.325
 OUTPUT_DIR = '../atlas_ng/'
@@ -133,7 +133,6 @@ class NumpyToNeuroglancer():
 
 def create_atlas(create, atlas_name):
     start = timer()
-    DATA_PATH = '/net/birdstore/Active_Atlas_Data/data_root'
     fixed_brain = 'MD589'
     INPUT = os.path.join(f'/net/birdstore/Active_Atlas_Data/data_root/pipeline_data/{fixed_brain}/preps/CH1/thumbnail')
     ATLAS_PATH = os.path.join(DATA_PATH, 'atlas_data', atlas_name)

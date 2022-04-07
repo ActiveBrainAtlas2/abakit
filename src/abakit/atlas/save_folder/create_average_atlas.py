@@ -19,16 +19,16 @@ PIPELINE_ROOT = Path('./src').absolute()
 sys.path.append(PIPELINE_ROOT.as_posix())
 
 surface_level = 0.9
-from lib.SqlController import SqlController
-from lib.FileLocationManager import DATA_PATH
-from lib.utilities_atlas import load_original_volume_all_known_structures_v3, get_centroid_3d, \
+from abakit.lib.SqlController import SqlController
+from abakit.settings import DATA_PATH
+from abakit.lib.utilities_atlas import load_original_volume_all_known_structures_v3, get_centroid_3d, \
     load_alignment_results_v3, transform_points, average_location, \
     load_original_volume_v2, \
     convert_transform_forms, volume_to_polydata, singular_structures, \
     average_shape, mirror_volume_v2, \
     save_mesh_stl, transform_volume_v4, \
     load_mean_shape
-from lib.atlas_aligner import Aligner
+from abakit.lib.atlas_aligner import Aligner
 
 fixed_brain_name = 'MD589'
 sqlController = SqlController(fixed_brain_name)

@@ -15,13 +15,13 @@ import igneous.task_creation as tc
 from cloudvolume import CloudVolume
 from pathlib import Path
 from scipy.ndimage.measurements import center_of_mass
-
+from abakit.settings import DATA_PATH
 
 PIPELINE_ROOT = Path('./src').absolute()
 sys.path.append(PIPELINE_ROOT.as_posix())
 
 
-from lib.SqlController import SqlController
+from abakit.lib.SqlController import SqlController
 
 RESOLUTION = 0.325
 
@@ -130,7 +130,7 @@ class AtlasCreater:
     def __init__(self, atlas_name, debug):
         self.atlas_name = atlas_name
         self.debug = debug
-        self.DATA_PATH = '/net/birdstore/Active_Atlas_Data/data_root'
+        self.DATA_PATH = DATA_PATH
         self.fixed_brain = 'MD589'
         self.INPUT = os.path.join(f'/net/birdstore/Active_Atlas_Data/data_root/pipeline_data/{self.fixed_brain}/preps/CH1/thumbnail')
         self.ATLAS_PATH = os.path.join(self.DATA_PATH, 'atlas_data', atlas_name)

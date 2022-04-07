@@ -9,10 +9,10 @@ import numpy as np
 from timeit import default_timer as timer
 import shutil
 from cloudvolume import CloudVolume
-from atlas.Atlas import Atlas
-from lib.utilities_cvat_neuroglancer import NumpyToNeuroglancer
-from atlas.Assembler import AtlasAssembler, BrainAssembler
-from atlas.BrainStructureManager import BrainStructureManager
+from abakit.atlas.Atlas import Atlas
+from abakit.lib.utilities_cvat_neuroglancer import NumpyToNeuroglancer
+from abakit.atlas.Assembler import AtlasAssembler, BrainAssembler
+from abakit.atlas.BrainStructureManager import BrainStructureManager
 
 class NgConverter(NumpyToNeuroglancer):
     def __init__(self, volume, scales, offset=[0, 0, 0], layer_type='segmentation'):

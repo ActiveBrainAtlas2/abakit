@@ -3,10 +3,10 @@ from pathlib import Path
 PIPELINE_ROOT = Path('./src').absolute()
 sys.path.append(PIPELINE_ROOT.as_posix())
 
-from atlas.FoundationContourAligner import FoundationContourAligner
-from atlas.VolumeMaker import VolumeMaker
-from atlas.BrainMerger import BrainMerger
-from atlas.NgSegmentMaker import AtlasNgMaker
+from abakit.atlas.FoundationContourAligner import FoundationContourAligner
+from abakit.atlas.VolumeMaker import VolumeMaker
+from abakit.atlas.BrainMerger import BrainMerger
+from abakit.atlas.NgSegmentMaker import AtlasNgMaker
 
 
 def align_contour(animal):

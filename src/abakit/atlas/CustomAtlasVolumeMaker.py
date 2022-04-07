@@ -1,9 +1,9 @@
-from Brain import Brain
-from atlas.Atlas import Atlas
-from atlas.Assembler import AtlasAssembler
-from atlas.VolumeUtilities import VolumeUtilities
-from atlas.NgSegmentMaker import AtlasNgMaker
-from lib.SqlController import SqlController
+from abakit.lib.Brain import Brain
+from abakit.atlas.Atlas import Atlas
+from abakit.atlas.Assembler import AtlasAssembler
+from abakit.atlas.VolumeUtilities import VolumeUtilities
+from abakit.atlas.NgSegmentMaker import AtlasNgMaker
+from abakit.lib.SqlController import SqlController
 import numpy as np
 class CustomAtlasVolumeMaker(Brain):
     def __init__(self,animal,atlas = 'atlasV8',volume_threshold = 0.9,sigma = 3):

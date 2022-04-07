@@ -1,0 +1,5 @@
+user:  "dklab"
+password: "$pw4dklabdb"
+host:  "db.dk.ucsd.edu"
+schema: "active_atlas_production"
+
