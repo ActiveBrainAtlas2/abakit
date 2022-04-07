@@ -5,15 +5,12 @@ from pytorch3d.transforms import Scale
 from pytorch3d.transforms import Translate
 from torch.nn import Module
 from torch.nn import Parameter
-
 from .algorithm import umeyama
-
 
 class Transform(Module):
     def transform_numpy(self, moving):
         """Apply transform to the moving object and get numpy result."""
         return self.forward(torch.tensor(moving)).detach().numpy()
-
 
 class LinearTransform(Transform):
     def get_linear_matrix(self):
@@ -25,7 +22,6 @@ class LinearTransform(Transform):
         """Get the translation vector."""
         affine_matrix = self._transform.get_matrix()
         return affine_matrix[0, 3, :3].numpy()
-
 
 class LandmarkRigidTransform(LinearTransform):
     """Rigid transform for landmark."""
@@ -67,7 +63,6 @@ class LandmarkRigidTransform(LinearTransform):
     def forward(self, moving_landmark):
         return self._transform.transform_points(moving_landmark)
 
-
 class LandmarkSimilarTransform(LandmarkRigidTransform):
     """Similar transform for landmark."""
 
@@ -88,7 +83,6 @@ class LandmarkSimilarTransform(LandmarkRigidTransform):
 
     def transform(self):
         return self.scale().compse(super().transform())
-
 
 class LandmarkAffineTransform(LinearTransform):
     """Affine transform for landmark."""

@@ -28,16 +28,24 @@ class AnnotationLayer:
 
     
     def parse_point(self,point_json):
-        return Point(point_json['point'],point_json['id'])
+        point = Point(point_json['point'],point_json['id'])
+        if 'description' in point_json:
+            point.description = point_json['description']
+        return point
     
     def parse_line(self,line_json):
         line = Line(line_json['pointA'],line_json['pointB'],line_json['id'])
         if 'parentAnnotationId' in line_json:
             line.parent_id = line_json['parentAnnotationId']
+        if 'description' in line_json:
+            line.description = line_json['description']
         return line
 
-    def parse_polygon(self,polygon):
-        return Polygon(polygon['id'],polygon['childAnnotationIds'],polygon['source'])
+    def parse_polygon(self,polygon_json):
+        polygon = Polygon(polygon_json['id'],polygon_json['childAnnotationIds'],polygon_json['source'])
+        if 'description' in polygon_json:
+            polygon.description = polygon_json['description']
+        return polygon
     
     def search_annotation_with_id(self,id):
         search_result = [annotationi.id == id for annotationi in self.annotations]
@@ -61,7 +69,7 @@ class AnnotationLayer:
 
 class Point:
     def __init__(self,coord,id):
-        self.coord = coord
+        self.coord = np.array(coord)
         self.id = id
         self.type = 'point'
     
@@ -71,8 +79,8 @@ class Point:
 
 class Line:
     def __init__(self,coord_start,coord_end,id):
-        self.coord_start = coord_start
-        self.coord_end = coord_end
+        self.coord_start = np.array(coord_start)
+        self.coord_end = np.array(coord_end)
         self.id = id
         self.type = 'line'
 
