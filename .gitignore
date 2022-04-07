@@ -1,7 +1,7 @@
 # Local files
 dev/env/
 docs/api/
-
+build/
 # General Python files
 # https://github.com/github/gitignore/blob/master/Python.gitignore
 
@@ -20,4 +20,3 @@ __pycache__/
 # Sphinx documentation
 docs/_build/
 
-build/
