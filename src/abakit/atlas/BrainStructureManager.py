@@ -12,7 +12,7 @@ from collections import defaultdict
 from abakit.settings import DATA_PATH
 class BrainStructureManager(Brain, VolumeUtilities):
 
-    def __init__(self, animal,atlas = ATLAS,downsample_factor = 32):
+    def __init__(self, animal,atlas = ATLAS,downsample_factor = 32,check_path = True):
         Brain.__init__(self, animal)
         self.origins = {}
         self.COM = {}
@@ -20,7 +20,8 @@ class BrainStructureManager(Brain, VolumeUtilities):
         self.aligned_contours = {}
         self.thresholded_volumes = {}
         self.atlas = atlas
-        self.set_path_and_create_folders()
+        if check_path:
+            self.set_path_and_create_folders()
         self.attribute_functions = dict(
             origins=self.load_origins,
             volumes=self.load_volumes,
