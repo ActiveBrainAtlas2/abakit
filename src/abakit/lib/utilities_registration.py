@@ -22,7 +22,16 @@ import SimpleITK as sitk
 from IPython.display import clear_output
 import cv2
 from scipy.stats import skew
+from scipy.ndimage import affine_transform
 
+def parameters_to_rigid_transform(rotation, xshift, yshift, center):
+    rotation, xshift, yshift = np.array([rotation, xshift, yshift]).astype(np.float16)
+    center = np.array(center).astype(np.float16)
+    R = np.array([[np.cos(rotation), -np.sin(rotation)],
+                    [np.sin(rotation), np.cos(rotation)]])
+    shift = center + (xshift, yshift) - np.dot(R, center)
+    T = np.vstack([np.column_stack([R, shift]), [0, 0, 1]])
+    return T
 
 def create_matrix(final_transform):
     finalParameters = final_transform.GetParameters()
@@ -169,15 +178,17 @@ def rotate_and_align_image(moving,fixed):
     fixed_mask = np.array((np.array(fixed)>np.mean(fixed))*255).astype('uint8')
     theta_moving,center_moving = find_principle_vector(moving_mask)
     theta_fixed,center_fixed = find_principle_vector(fixed_mask)
-    straight_moving = moving.rotate(((theta_moving+2*np.pi)%(2*np.pi))/np.pi*180,center =list(center_moving))
-    straight_fixed = fixed.rotate(((theta_fixed+2*np.pi)%(2*np.pi))/np.pi*180,center =list(center_fixed))
+    T = parameters_to_rigid_transform(rotation = -theta_moving,xshift=0,yshift=0,center=np.flip(center_moving))
+    straight_moving = affine_transform(moving,T)
+    T = parameters_to_rigid_transform(rotation = -theta_fixed,xshift=0,yshift=0,center=np.flip(center_fixed))
+    straight_fixed = affine_transform(fixed,T)
     skewness_moving = find_skewness_along_X(straight_moving)
     skewness_fixed = find_skewness_along_X(straight_fixed)
     if np.sign(skewness_fixed) != np.sign(skewness_moving):
         theta_moving = (theta_moving+np.pi)%(2*np.pi)
     rotation_angle = theta_fixed-theta_moving
     offset = center_fixed - center_moving
-    rotation_angle = (theta_fixed-theta_moving+np.pi)%(2*np.pi)
+    rotation_angle = (theta_fixed-theta_moving)%(2*np.pi)
     return rotation_angle,offset,center_moving
 
 def register_simple(INPUT, fixed_index, moving_index,debug=False,tries = 10):
@@ -186,7 +197,7 @@ def register_simple(INPUT, fixed_index, moving_index,debug=False,tries = 10):
     moving_file = os.path.join(INPUT, f'{moving_index}.tif')
     fixed = sitk.ReadImage(fixed_file, pixelType)
     moving = sitk.ReadImage(moving_file, pixelType)
-    rotation_angle,offset,center_moving = rotate_and_align_image(moving,fixed)
+    rotation_angle,offset,center_moving = rotate_and_align_image(sitk.GetArrayFromImage(moving),sitk.GetArrayFromImage(fixed))
     initial_transform = sitk.Euler2DTransform()
     initial_transform.SetParameters(rotation_angle,*offset)
     initial_transform.SetFixedParameters(center_moving)
