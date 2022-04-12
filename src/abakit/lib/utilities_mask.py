@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.figure
 from skimage import exposure, io
 
-from lib.utilities_process import get_last_2d
+from abakit.lib.utilities_process import get_last_2d
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 fontScale = 1
@@ -19,7 +19,6 @@ def create_xcf(tif_path,mask_path,xcf_path):
     interface.add_batch_script()
     report = interface.execute()
     return report
-
 def save_mask_after_edit(modsav,xcf_path):
     interface = GimpInterface()
     gimp_tool_path = os.path.join(os.getcwd(),'src','lib')
@@ -195,7 +194,7 @@ def make_mask(img):
     return closing, scaled
 
 
-def place_image(img, file, max_width, max_height, bgcolor=None):
+def pad_image(img, file, max_width, max_height, bgcolor=None):
     """
     Places the image in a padded one size container with the correct background
     :param img: image we are working on.
@@ -205,11 +204,11 @@ def place_image(img, file, max_width, max_height, bgcolor=None):
     :param bgcolor: background color of image, 0 for NTB, white for thionin
     :return: placed image centered in the correct size.
     """
-    zmidr = max_height // 2
-    zmidc = max_width // 2
-    startr = zmidr - (img.shape[0] // 2)
+    half_max_width = max_width // 2
+    half_max_height = max_height // 2
+    startr = half_max_width - (img.shape[0] // 2)
     endr = startr + img.shape[0]
-    startc = zmidc - (img.shape[1] // 2)
+    startc = half_max_height - (img.shape[1] // 2)
     endc = startc + img.shape[1]
     dt = img.dtype
     if bgcolor == None:
@@ -217,13 +216,13 @@ def place_image(img, file, max_width, max_height, bgcolor=None):
         bottom_rows = img[start_bottom:img.shape[0], :]
         avg = np.mean(bottom_rows)
         bgcolor = int(round(avg))
-    new_img = np.zeros([max_height, max_width]) + bgcolor
+    new_img = np.zeros([ max_width,max_height]) + bgcolor
     if img.ndim == 2:
         try:
-            new_img[startr:endr, startc:endc] = img
+            new_img[startr:endr,startc:endc] = img
         except:
             print('Could not place {} with width:{}, height:{} in {}x{}'
-                  .format(file, img.shape[1], img.shape[0], max_width, max_height))
+                  .format(file, img.shape[0], img.shape[1], max_width, max_height))
     if img.ndim == 3:
         try:
             new_img = np.zeros([max_height, max_width, 3]) + bgcolor
@@ -231,8 +230,8 @@ def place_image(img, file, max_width, max_height, bgcolor=None):
             new_img[startr:endr, startc:endc,1] = img[:,:,1]
             new_img[startr:endr, startc:endc,2] = img[:,:,2]
         except:
-            print('Could not place 3DIM image {} with width:{}, height:{} in {}x{}'
-                  .format(file, img.shape[1], img.shape[0], max_width, max_height))
+            print('Could not place {} with width:{}, height:{} in {}x{}'
+                  .format(file, img.shape[0], img.shape[1], max_width, max_height))
     del img
     return new_img.astype(dt)
 
@@ -265,7 +264,7 @@ def check_contour(contours, area, lc):
         return contours, lc
 
 
-def scaled(img, mask, epsilon=0.05, scale=45000):
+def scaled(img, mask, epsilon=0.01):
     """
     This scales the image to the limit specified. You can get this value
     by looking at the combined histogram of the image stack. It is quite
@@ -277,13 +276,14 @@ def scaled(img, mask, epsilon=0.05, scale=45000):
     :param limit: max value we wish to scale to
     :return: scaled image in 16bit format
     """
-    _max = np.quantile(img[mask > 0], 1 - epsilon) # gets almost the max value of img
+    scale = 45000
+    _max = np.quantile(img[mask > 10], 1 - epsilon) # gets almost the max value of img
     # print('thr=%d, index=%d'%(vals[ind],index))
     if scale > 255:
         _range = 2 ** 16 - 1 # 16bit
         data_type = np.uint16
     else:
-        _range = 2 ** 8 - 1 # 8bit
+        _range = 2 ** 256 - 1 # 8bit
         data_type = np.uint8        
     scaled = img * (scale / _max) # scale the image from original values to e.g., 30000/10000
     scaled[scaled > _range] = _range # if values are > 16bit, set to 16bit
@@ -359,7 +359,6 @@ def create_mask_pass1(img):
     """
     img = exposure.adjust_log(img, 1)
     img = exposure.adjust_gamma(img, 2)
-
     mask = compute_mask(img, m=0.2, M=0.9, cc=False, opening=2, exclude_zeros=True)
     mask = mask.astype(int)
     mask[mask==0] = 0

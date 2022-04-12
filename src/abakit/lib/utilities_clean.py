@@ -3,11 +3,11 @@ import cv2
 import numpy as np
 from skimage import io
 from concurrent.futures.process import ProcessPoolExecutor
-from lib.sql_setup import CLEAN_CHANNEL_1_THUMBNAIL_WITH_MASK
-from lib.file_location import FileLocationManager
-from lib.sqlcontroller import SqlController
-from lib.utilities_mask import rotate_image, place_image, scaled, equalized
-from lib.utilities_process import test_dir, SCALING_FACTOR, get_cpus
+from abakit.lib.sql_setup import CLEAN_CHANNEL_1_THUMBNAIL_WITH_MASK
+from abakit.lib.FileLocationManager import FileLocationManager
+from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.utilities_mask import rotate_image, place_image, scaled, equalized
+from abakit.lib.utilities_process import test_dir, SCALING_FACTOR, get_cpus
 import tifffile as tiff
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None

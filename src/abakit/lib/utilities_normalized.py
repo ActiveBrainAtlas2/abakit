@@ -3,8 +3,8 @@ import os
 import cv2
 import numpy as np
 from skimage import io
-from lib.file_location import FileLocationManager
-from lib.utilities_mask import equalized
+from abakit.lib.FileLocationManager import FileLocationManager
+from abakit.lib.utilities_mask import equalized
 
 
 def create_normalization(animal, channel):

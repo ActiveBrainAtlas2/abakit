@@ -2,13 +2,13 @@ import os, sys, time
 from datetime import datetime
 from tqdm import tqdm
 import re
-from lib.file_location import FileLocationManager
-from lib.sqlcontroller import SqlController
-from lib.utilities_bioformats import get_czi_metadata, get_fullres_series_indices
+from abakit.lib.FileLocationManager import FileLocationManager
+from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.utilities_bioformats import get_czi_metadata, get_fullres_series_indices
 from model.scan_run import ScanRun
 from model.slide import Slide
 from model.slide_czi_to_tif import SlideCziTif
-from lib.sql_setup import session, SLIDES_ARE_SCANNED, CZI_FILES_ARE_PLACED_ON_BIRDSTORE, CZI_FILES_ARE_SCANNED_TO_GET_METADATA
+from abakit.lib.sql_setup import session, SLIDES_ARE_SCANNED, CZI_FILES_ARE_PLACED_ON_BIRDSTORE, CZI_FILES_ARE_SCANNED_TO_GET_METADATA
 
 
 def make_meta(animal):

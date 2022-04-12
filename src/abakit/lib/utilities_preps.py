@@ -5,11 +5,11 @@ Image.MAX_IMAGE_PIXELS = None
 from concurrent.futures.process import ProcessPoolExecutor
 
 from shutil import copyfile
-from lib.sql_setup import CREATE_CHANNEL_3_FULL_RES, \
+from abakit.lib.sql_setup import CREATE_CHANNEL_3_FULL_RES, \
     CREATE_CHANNEL_2_FULL_RES, CREATE_CHANNEL_3_THUMBNAILS, CREATE_CHANNEL_2_THUMBNAILS
-from lib.file_location import FileLocationManager
-from lib.sqlcontroller import SqlController
-from lib.utilities_process import create_downsample, test_dir, \
+from abakit.lib.FileLocationManager import FileLocationManager
+from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.utilities_process import create_downsample, test_dir, \
     get_image_size, resize_and_save_tif
 
 def set_task_preps(animal,channel):
