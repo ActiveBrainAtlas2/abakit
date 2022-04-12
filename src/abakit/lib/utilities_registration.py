@@ -199,7 +199,7 @@ def register_simple(INPUT, fixed_index, moving_index,debug=False,tries = 10):
     moving = sitk.ReadImage(moving_file, pixelType)
     rotation_angle,offset,center_moving = rotate_and_align_image(sitk.GetArrayFromImage(moving),sitk.GetArrayFromImage(fixed))
     initial_transform = sitk.Euler2DTransform()
-    initial_transform.SetParameters(rotation_angle,*offset)
+    initial_transform.SetParameters([rotation_angle,*offset.astype(float)])
     initial_transform.SetFixedParameters(center_moving)
     moving = resample(moving,initial_transform)
     for _ in range(tries):
