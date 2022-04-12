@@ -3,9 +3,9 @@ import sys
 from cloudvolume import CloudVolume
 from taskqueue import LocalTaskQueue
 import igneous.task_creation as tc
-from lib.file_location import FileLocationManager
-from lib.utilities_cvat_neuroglancer import calculate_chunks, calculate_factors
-from lib.utilities_process import get_cpus
+from abakit.lib.FileLocationManager import FileLocationManager
+from abakit.lib.utilities_cvat_neuroglancer import calculate_chunks, calculate_factors
+from abakit.lib.utilities_process import get_cpus
 
 def create_downsamples(animal, channel, downsample):
     fileLocationManager = FileLocationManager(animal)

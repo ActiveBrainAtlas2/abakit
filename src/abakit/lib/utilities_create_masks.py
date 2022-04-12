@@ -11,9 +11,9 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from abakit.utilities.file_location import FileLocationManager 
 from abakit.utilities.shell_tools import get_image_size
 from abakit.utilities.masking import combine_dims, merge_mask
-from lib.sql_setup import CREATE_FULL_RES_MASKS
-from lib.sqlcontroller import SqlController
-from lib.utilities_process import get_cpus, test_dir
+from abakit.lib.sql_setup import CREATE_FULL_RES_MASKS
+from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.utilities_process import get_cpus, test_dir
 import warnings
 warnings.filterwarnings("ignore")
 

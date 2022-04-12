@@ -7,7 +7,7 @@ Image.MAX_IMAGE_PIXELS = None
 import pickle
 import re
 from abakit.lib.SqlController import SqlController
-from abakit.lib.file_location import FileLocationManager
+from abakit.lib.FileLocationManager import FileLocationManager
 import tifffile as tiff
 from scipy.ndimage import affine_transform
 def load_transforms(stack, downsample_factor=None, resolution=None, use_inverse=True, anchor_filepath=None):
