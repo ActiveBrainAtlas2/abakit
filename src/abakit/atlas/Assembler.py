@@ -15,7 +15,7 @@ class Assembler:
         self.side = side
         sides = ['_L','_R']
         sides.remove(side)
-        self.sother_side = sides[0]
+        self.other_side = sides[0]
 
     def initialize_origins_and_volumes(self):
         if not self.origins == {}:
