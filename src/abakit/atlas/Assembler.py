@@ -14,7 +14,8 @@ class Assembler:
             assert hasattr(self,'volumes')
         self.side = side
         sides = ['_L','_R']
-        self.sother_side = sides.remove(side)[0]
+        sides.remove(side)
+        self.sother_side = sides[0]
 
     def initialize_origins_and_volumes(self):
         if not self.origins == {}:
