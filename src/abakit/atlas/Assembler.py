@@ -3,7 +3,9 @@ from abakit.atlas.Atlas import BrainStructureManager
 from abakit.atlas.VolumeUtilities import VolumeUtilities
 from abakit.lib.Brain import Brain
 from abakit.atlas.Atlas import AtlasInitiator
-
+from scipy.ndimage.measurements import center_of_mass
+from skimage.filters import gaussian
+from abakit.atlas.Assembler import Assembler
 
 class Assembler:
 
@@ -162,3 +164,20 @@ class AtlasAssembler(AtlasInitiator, Assembler):
         self.origins = self.get_origin_from_coms()
         Assembler.__init__(self)    
 
+def get_v7_volume_and_origin():
+    atlas = Atlas(atlas = 'atlasV7')
+    atlas.load_volumes()
+    atlas.load_com()
+    volume_coms = np.array([center_of_mass(atlas.volumes[si]) for si in atlas.COM.keys()]).astype(int)
+    average_com = np.array(list(atlas.COM.values()))/np.array([10,10,20])
+    origins = average_com - volume_coms
+    atlas.origins = dict(zip(atlas.COM.keys(),origins))
+    sorted_keys = sorted(atlas.volumes.keys())
+    for key,value in atlas.volumes.items():
+        if key in ['SC','IC']:
+            atlas.volumes[key] = gaussian(value,2)>0.1
+        else:
+            atlas.volumes[key] = gaussian(value,2)>0.5
+    atlas.volumes  = dict(zip(sorted_keys,[atlas.volumes[keyi] for keyi in sorted_keys]))
+    atlas.origins  = dict(zip(sorted_keys,[atlas.origins[keyi] for keyi in sorted_keys]))
+    return atlas.volumes,atlas.origins
