@@ -73,3 +73,9 @@ def brain_to_atlas_transform(brain_coord, r, t):
     atlas_coord = r @ brain_coord + t
     return atlas_coord.T[0] # Convert back to a row vector
 
+def align_point_dictionary(moving_points,fixed_points):
+    common_keys = moving_points.keys() & fixed_points.keys()
+    fixed_point_set = np.array([fixed_points[s] for s in common_keys]).T
+    moving_point_set = np.array([moving_points[s] for s in common_keys]).T
+    R, t = umeyama(moving_point_set, fixed_point_set)
+    return R,t
