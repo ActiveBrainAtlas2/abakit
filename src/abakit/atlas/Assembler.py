@@ -115,7 +115,7 @@ class Assembler:
                 right_structure = structure.split('_')[0] + self.other_side
                 com_z_right = self.COM[right_structure][2]
                 distance = com_z_right - mid_point
-                com_z_left = com_z_right - distance * 2
+                com_z_left = com_z_right - distance * 2 - self.volumes[structure].shape[2]
                 self.COM[structure][2] = com_z_left
                 self.COM[structure][:2] = self.COM[right_structure][:2]
     
