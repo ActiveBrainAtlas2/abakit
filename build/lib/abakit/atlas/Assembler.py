@@ -7,9 +7,14 @@ from abakit.atlas.Atlas import AtlasInitiator
 
 class Assembler:
 
-    def __init__(self,check = True,*arg,**kwarg):
+    def __init__(self,check = True,side = '_L',*arg,**kwarg):
         if check:
-            self.check_attributes(['volumes', 'structures', 'origins'])
+            assert hasattr(self,'origins')
+            assert hasattr(self,'structures')
+            assert hasattr(self,'volumes')
+        self.side = side
+        sides = ['_L','_R']
+        self.sother_side = sides.remove(side)[0]
 
     def initialize_origins_and_volumes(self):
         if not self.origins == {}:
@@ -74,11 +79,11 @@ class Assembler:
         self.mirror_volumes_of_paired_structures()
 
     def find_mid_point_from_paired_structures(self):
-        self.check_attributes(['origins'])
+        assert hasattr(self,'origins')
         mid_points = []
         for structure, origin in self.origins.items():
-            if '_L' in structure:
-                right_structure = structure.split('_')[0] + '_R' 
+            if self.side in structure:
+                right_structure = structure.split('_')[0] + self.other_side
                 structure_width = self.volumes[right_structure].shape[2]
                 mid_point = (self.origins[structure][2] + self.origins[right_structure][2]) / 2
                 mid_points.append(mid_point + structure_width / 2)
@@ -86,13 +91,13 @@ class Assembler:
         return mid_point
 
     def center_mid_line_structures(self, mid_point):
-        self.check_attributes(['COM'])
+        assert hasattr(self,'COM')
         for structure, origin in self.COM.items():
             if not '_' in structure:
                 self.COM[structure][2] = mid_point
 
     def find_mid_point_from_midline_structures(self):
-        self.check_attributes(['COM'])
+        assert hasattr(self,'COM')
         mid_points = []
         for structure, origin in self.COM.items():
             if not '_' in structure:
@@ -103,10 +108,10 @@ class Assembler:
         return mid_point
     
     def mirror_COMs(self, mid_point):
-        self.check_attributes(['COM'])
+        assert hasattr(self,'COM')
         for structure, com_z_right in self.COM.items():
-            if '_L' in structure:
-                right_structure = structure.split('_')[0] + '_R'
+            if self.side in structure:
+                right_structure = structure.split('_')[0] + self.other_side
                 com_z_right = self.COM[right_structure][2]
                 distance = com_z_right - mid_point
                 com_z_left = com_z_right - distance * 2
@@ -115,8 +120,8 @@ class Assembler:
     
     def mirror_volumes_of_paired_structures(self):
         for structure in self.volumes:
-            if '_L' in structure:
-                structure_right = structure.split('_')[0] + '_R'
+            if self.side in structure:
+                structure_right = structure.split('_')[0] + self.other_side
                 if structure_right in self.volumes:
                     self.volumes[structure] = self.volumes[structure_right][:,:,::-1]
 
