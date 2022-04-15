@@ -5,7 +5,7 @@ from abakit.lib.Brain import Brain
 from abakit.atlas.Atlas import AtlasInitiator
 from scipy.ndimage.measurements import center_of_mass
 from skimage.filters import gaussian
-from abakit.atlas.Assembler import Assembler
+from abakit.atlas.Atlas import Atlas
 
 class Assembler:
 
@@ -164,7 +164,7 @@ class AtlasAssembler(AtlasInitiator, Assembler):
         self.origins = self.get_origin_from_coms()
         Assembler.__init__(self)    
 
-def get_v7_volume_and_origin():
+def get_v7_volume_and_origin(side = '_L'):
     atlas = Atlas(atlas = 'atlasV7')
     atlas.load_volumes()
     atlas.load_com()
@@ -180,4 +180,10 @@ def get_v7_volume_and_origin():
             atlas.volumes[key] = gaussian(value,2)>0.5
     atlas.volumes  = dict(zip(sorted_keys,[atlas.volumes[keyi] for keyi in sorted_keys]))
     atlas.origins  = dict(zip(sorted_keys,[atlas.origins[keyi] for keyi in sorted_keys]))
-    return atlas.volumes,atlas.origins
+    assembler = Assembler(check=False,side = side)
+    assembler.volumes,assembler.origins = atlas.volumes,atlas.origins
+    assembler.structures = np.array(list(assembler.volumes.keys()))
+    assembler.sqlController = atlas.sqlController
+    assembler.COM = atlas.COM
+    assembler.standardize_volumes()
+    return assembler.volumes,assembler.origins
