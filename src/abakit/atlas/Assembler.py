@@ -6,7 +6,7 @@ from abakit.atlas.Atlas import AtlasInitiator
 from scipy.ndimage.measurements import center_of_mass
 from skimage.filters import gaussian
 from abakit.atlas.Atlas import Atlas
-
+from copy import copy
 class Assembler:
 
     def __init__(self,check = True,side = '_L',*arg,**kwarg):
@@ -124,9 +124,9 @@ class Assembler:
     def mirror_volumes_of_paired_structures(self):
         for structure in self.volumes:
             if self.side in structure:
-                structure_right = structure.split('_')[0] + self.other_side
-                if structure_right in self.volumes:
-                    self.volumes[structure] = self.volumes[structure_right][:,:,::-1]
+                structure_other_side = structure.split('_')[0] + self.other_side
+                if structure_other_side in self.volumes:
+                    self.volumes[structure] = self.volumes[structure_other_side][:,:,::-1]
 
 
 class CustomAssembler(Brain, VolumeUtilities, Assembler):
@@ -181,7 +181,7 @@ def get_v7_volume_and_origin(side = '_L'):
     atlas.volumes  = dict(zip(sorted_keys,[atlas.volumes[keyi] for keyi in sorted_keys]))
     atlas.origins  = dict(zip(sorted_keys,[atlas.origins[keyi] for keyi in sorted_keys]))
     assembler = Assembler(check=False,side = side)
-    assembler.volumes,assembler.origins = atlas.volumes,atlas.origins
+    assembler.volumes,assembler.origins = copy(atlas.volumes),copy(atlas.origins)
     assembler.structures = np.array(list(assembler.volumes.keys()))
     assembler.sqlController = atlas.sqlController
     assembler.COM = atlas.COM
