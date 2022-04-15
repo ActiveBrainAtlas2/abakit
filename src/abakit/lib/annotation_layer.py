@@ -341,6 +341,6 @@ def check_if_contour_points_are_in_order(first_point, start_points, end_points):
     assert len(start_points) == len(end_points)
     assert len(start_points[0]) == len(end_points[0]) == len(first_point) == 3
     assert np.all(first_point == start_points[0])
-    npoints = len(first_point)
+    npoints = len(start_points)
     for i in range(npoints - 1):
         assert np.all(np.isclose(start_points[i + 1], end_points[i],atol=0.1))
