@@ -358,7 +358,7 @@ orientation_argparse_str_to_imagemagick_str =     {'transpose': '-transpose',
 
 
 
-def process_image(file_key):
+def clean_image(file_key):
     index, infile, outfile, T = file_key
     image = tiff.imread(infile)
     matrix = T[:2,:2]
