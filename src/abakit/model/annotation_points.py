@@ -2,8 +2,8 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.sql.sqltypes import Float
-from .atlas_model import Base
-from model.brain_region import BrainRegion
+from abakit.model.atlas_model import Base
+from abakit.model.brain_region import BrainRegion
 
 
 
