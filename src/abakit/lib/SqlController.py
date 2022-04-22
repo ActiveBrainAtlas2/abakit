@@ -9,7 +9,7 @@ from abakit.lib.sql_setup import session, pooledsession
 from abakit.model.file_log import FileLog
 from abakit.model.urlModel import UrlModel
 from abakit.model.task import Task, ProgressLookup
-from abakit.model.annotations_points import AnnotationPoint
+from abakit.model.annotation_points import AnnotationPoint
 from abakit.model.brain_region import BrainRegion
 from abakit.model.slide_czi_to_tif import SlideCziTif
 from abakit.model.slide import Slide
