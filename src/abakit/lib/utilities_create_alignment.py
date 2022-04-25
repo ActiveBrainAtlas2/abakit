@@ -17,7 +17,7 @@ from abakit.lib.utilities_alignment import (create_downsampled_transforms, proce
 from abakit.lib.utilities_process import test_dir, get_cpus
 from abakit.model.elastix_transformation import ElastixTransformation
 from abakit.lib.sql_setup import session
-
+from scipy.ndimage import affine_transform
 
 def create_elastix_transformation(rotation, xshift, yshift, center):
     R = np.array([[np.cos(rotation), -np.sin(rotation)],
@@ -84,8 +84,6 @@ def parse_elastix(animal):
             transformations[files[moving_index]] = T_composed
 
     return transformations
-
-
 
 
 def run_offsets(animal, transforms, channel, downsample, masks, create_csv, allen):
