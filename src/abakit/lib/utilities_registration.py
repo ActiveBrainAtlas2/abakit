@@ -158,8 +158,9 @@ def resample(image, transform):
 
 def find_principle_vector(mask):
     moments = cv2.moments(mask)
-    x = moments['m10']/moments['m00']
-    y = moments['m01']/moments['m00']
+    dtype = type(moments['m00'])
+    x = moments['m10']/(moments['m00']+0.00000001)
+    y = moments['m01']/(moments['m00']+0.00000001)
     u20 = moments['m20']/moments['m00'] - x**2
     u11 = moments['m11']/moments['m00'] - x*y
     u02 = moments['m02']/moments['m00'] - y**2
