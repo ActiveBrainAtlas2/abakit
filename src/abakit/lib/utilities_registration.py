@@ -165,7 +165,7 @@ def find_principle_vector(mask):
     u20 = moments['m20']/moments['m00'] - x**2
     u11 = moments['m11']/moments['m00'] - x*y
     u02 = moments['m02']/moments['m00'] - y**2
-    theta = 0.5*np.arctan(2*u11/(u20-u02)) + (u20<u02)*np.pi/2
+    theta = 0.5*np.arctan(2*u11/(u20-u02+0.00000001)) + (u20<u02)*np.pi/2
     x = moments['m10']/moments['m00']
     y = moments['m01']/moments['m00']
     center = np.array([x,y]).astype(int)
