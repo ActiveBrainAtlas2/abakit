@@ -26,8 +26,9 @@ class Controller(object):
     
     def get_row(self,search_dictionary,model):
         query_start = self.session.query(model)
+        exec(f'from {model.__module__} import {model.__name__}')
         for key, value in search_dictionary.items():
-            query_start = eval(f'query_start.filter(LayerData.{key}=="{value}")')
+            query_start = eval(f'query_start.filter({model.__name__}.{key}=="{value}")')
         return query_start.one()
     
     def row_exists(self,search_dictionary,model):
@@ -35,6 +36,7 @@ class Controller(object):
     
     def query_table(self,search_dictionary,model):
         query_start = self.session.query(model)
+        exec(f'from {model.__module__} import {model.__name__}')
         for key, value in search_dictionary.items():
-            query_start = eval(f'query_start.filter(LayerData.{key}=="{value}")')
+            query_start = eval(f'query_start.filter({model.__name__}.{key}=="{value}")')
         return query_start.all()

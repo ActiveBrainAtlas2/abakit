@@ -1,6 +1,7 @@
 from abakit.lib.Controllers.Controller import Controller
 from abakit.model.transformation import Transformation
 from abakit.model.transformation_type import TransformationType
+import pickle
 class TransformationController(Controller):
 
     def __init__(self):
@@ -17,3 +18,7 @@ class TransformationController(Controller):
         type_id = self.get_row(dict(transformation_type=transformation_type),TransformationType).id
         search_dictionary = dict(source = source,destination=destination,transformation_type = type_id)
         return self.get_row(search_dictionary,Transformation)
+    
+    def get_transformation(self,source,destination,transformation_type):
+        transformation = self.get_transformation_row(source,destination,transformation_type)
+        return pickle.loads(transformation.transformation)
