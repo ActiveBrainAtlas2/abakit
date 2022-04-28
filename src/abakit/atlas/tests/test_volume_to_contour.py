@@ -3,6 +3,8 @@ from abakit.atlas.VolumeToContour import VolumeToContour
 import numpy as np
 
 def test_volume_to_contour():
+    '''Tests the VolumeToContour class which turns a 3D mask to a set of contours. 
+     The test create a mockup volume and checks if the correct contours are generated.'''
     converter = VolumeToContour()
     origin,volume = get_test_origin_and_volume()
     test_contours,test_origin = get_test_contours_and_origin()
