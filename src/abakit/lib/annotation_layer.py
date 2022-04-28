@@ -172,8 +172,22 @@ class AnnotationLayer:
         point_json = {}
         ...
 
+class Annotation:
+    def is_point(self):
+        return self.type == 'point'
+    def is_polygon(self):
+        return self.type == 'polygon'
+    def is_volume(self):
+        return self.type == 'volume'
+    def is_line(self):
+        return self.type == 'line'
+    def get_description(self):
+        if hasattr(self,'description'):
+            return self.description
+        else:
+            return None
 
-class Point:
+class Point(Annotation):
     '''
     
     '''
@@ -188,7 +202,7 @@ class Point:
         ...
 
 
-class Line:
+class Line(Annotation):
     '''
     
     '''
@@ -206,7 +220,7 @@ class Line:
         ...
 
 
-class Polygon:
+class Polygon(Annotation):
     '''
     
     '''
@@ -241,7 +255,7 @@ class Polygon:
         section = int(np.floor(section))
         return section,contours2d
 
-class Volume:
+class Volume(Annotation):
     '''
     
     '''
