@@ -174,13 +174,13 @@ class AnnotationLayer:
 
 class Annotation:
     def is_point(self):
-        return self.type == 'point'
+        return self._type == 'point'
     def is_polygon(self):
-        return self.type == 'polygon'
+        return self._type == 'polygon'
     def is_volume(self):
-        return self.type == 'volume'
+        return self._type == 'volume'
     def is_line(self):
-        return self.type == 'line'
+        return self._type == 'line'
     def get_description(self):
         if hasattr(self,'description'):
             return self.description

@@ -24,9 +24,9 @@ def set_up():
     correct_info_file = read_file(test_folder+'/example_info_file')
     return output_dir,vmaker,correct_info_file
 
-def test_the_currect_folders_and_files_are_created(output_dir,correct_info_file):
+def check_the_currect_folders_and_files_are_created(output_dir,correct_info_file):
     assert os.path.exists(output_dir)
-    assert os.listdir(output_dir) == ['info', '1_1_1', 'names', 'provenance', 'mesh_mip_0_err_40']
+    assert np.all([i in ['info', '1_1_1', 'names', 'provenance', 'mesh_mip_0_err_40'] for i in os.listdir(output_dir)])
     assert os.path.getsize(output_dir) >50
     info_file = read_file(output_dir+'/info')
     assert info_file == correct_info_file
@@ -37,5 +37,5 @@ def test_contour_to_segments():
     The test create a mockup volume and checks if the correct contours are generated.'''
     output_dir,vmaker,correct_info_file = set_up()
     run_ng_segment_maker_on_test_volume(vmaker,output_dir)
-    test_the_currect_folders_and_files_are_created(output_dir,correct_info_file)
+    check_the_currect_folders_and_files_are_created(output_dir,correct_info_file)
     shutil.rmtree(output_dir)
