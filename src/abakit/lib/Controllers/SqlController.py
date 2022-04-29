@@ -9,7 +9,7 @@ from abakit.lib.Controllers.ElasticsController import ElasticsController
 from abakit.lib.Controllers.LayerDataController import LayerDataController
 from abakit.lib.Controllers.StructuresController import StructuresController
 from abakit.lib.Controllers.TransformationController import TransformationController
-
+from abakit.lib.Controllers.UrlController import UrlController
 from abakit.lib.sql_setup import  pooledsession
 from abakit.model.file_log import FileLog
 from abakit.model.task import Task, ProgressLookup
@@ -26,7 +26,7 @@ from sqlalchemy import func
 from sqlalchemy.orm.exc import NoResultFound
 
 
-class SqlController(ElasticsController,LayerDataController,StructuresController,TransformationController):
+class SqlController(ElasticsController,LayerDataController,StructuresController,TransformationController,UrlController):
     """ Create a class for processing the pipeline,
     """
 

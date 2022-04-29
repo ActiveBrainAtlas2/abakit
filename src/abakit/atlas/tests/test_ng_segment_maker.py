@@ -4,12 +4,7 @@ import os
 import shutil
 import pytest
 from util import get_test_volume_maker
-
-def read_file(path):
-    text_file = open(path, "r")
-    data = text_file.read()
-    text_file.close()
-    return data
+from abakit.lib.python_util import read_file
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_contour_to_segments():
