@@ -502,8 +502,9 @@ class SqlController(object):
         except Exception as e:
             print(f'No merge {e}')
             self.session.rollback()
-        finally:
-            self.session.close()
+    
+    def structure_exists(self,structurei):
+        return bool(self.session.query(BrainRegion).filter(BrainRegion.abbreviation==structurei).first())
         
     def add_url(self,content,title,person_id):
         url = UrlModel(url = content,comments = title,person_id = person_id)
