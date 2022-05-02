@@ -44,7 +44,7 @@ class AnnotationLayer:
                 annotations.append(self.parse_line(annotationi))
         self.annotations = np.array(annotations)
         self.group_annotations('polygon')
-        self.reorder_polygon_points()
+        # self.reorder_polygon_points()
         # self.check_polygon_points()
         self.group_annotations('volume')
     
