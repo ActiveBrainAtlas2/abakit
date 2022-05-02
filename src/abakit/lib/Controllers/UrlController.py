@@ -1,6 +1,6 @@
 from abakit.model.urlModel import UrlModel
-
-class UrlController:
+from abakit.lib.Controllers.Controller import Controller
+class UrlController(Controller):
         
     def url_exists(self,comments):
         row_exists = bool(self.session.query(UrlModel).filter(UrlModel.comments == comments).first())
