@@ -1,6 +1,7 @@
 import numpy as np
 from abakit.model.annotation_points import PolygonSequence
 from abakit.model.annotation_session import AnnotationSession
+from abakit.lib.annotation_layer import Volume
 import json
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
@@ -11,5 +12,16 @@ class PolygonSequenceController(Controller):
         information = [[i.session.FK_prep_id,i.user,i.brain_region.abbreviation] for i in active_sessions]
         return np.unique(information)
     
-    def get_volume(self,prep_id,user_id,structure_id):
-        active_sessions = self.session.query(PolygonSequence).distinct(PolygonSequence.FK_session_id).all()
+    def get_volume(self,prep_id,annotator_id,structure_id):
+        session = self.session.query(AnnotationSession)\
+            .filter(AnnotationSession.FK_prep_id==prep_id)\
+            .filter(AnnotationSession.FK_annotator_id==annotator_id)\
+            .filter(AnnotationSession.FK_structure_id==structure_id)\
+            .filter(AnnotationSession.active==1).first()   
+        volume_points = self.session.query(PolygonSequence).filter(PolygonSequence.FK_session_id==session.id).all()
+        volume = {}
+        volume['coordinate']=[[i.x,i.y,i.z] for i in volume_points]
+        volume['point_ordering']=[[i.point_order] for i in volume_points]
+        volume['polygon_ordering']=[[i.polygon_index] for i in volume_points]
+        volume = pd.DataFrame(volume)
+        return volume
