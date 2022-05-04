@@ -1,7 +1,6 @@
 import numpy as np
 from abakit.model.annotation_points import PolygonSequence
-from abakit.model.annotation_session import AnnotationSession,AnnotationType,get_available_volumes_sessions
-from abakit.lib.annotation_layer import Volume
+from abakit.model.annotation_session import AnnotationSession,AnnotationType
 import json
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
