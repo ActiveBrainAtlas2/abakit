@@ -8,7 +8,7 @@ from abakit.lib.Controllers.Controller import Controller
 
 class PolygonSequenceController(Controller):
     def get_available_volumes(self):
-        active_sessions = get_available_volumes_sessions()
+        active_sessions = self.get_available_volumes_sessions()
         information = [[i.FK_prep_id,i.user.first_name,i.brain_region.abbreviation] for i in active_sessions]
         return information
     
@@ -25,3 +25,9 @@ class PolygonSequenceController(Controller):
         volume['polygon_ordering']=[[i.polygon_index] for i in volume_points]
         volume = pd.DataFrame(volume)
         return volume
+    
+    def get_available_volumes_sessions(self):
+        active_sessions = self.session.query(AnnotationSession).\
+            filter(AnnotationSession.annotation_type==AnnotationType.POLYGON_SEQUENCE)\
+            .filter(AnnotationSession.active==1).all()
+        return active_sessions
