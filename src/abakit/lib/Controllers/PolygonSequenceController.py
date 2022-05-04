@@ -20,8 +20,8 @@ class PolygonSequenceController(Controller):
         volume_points = self.session.query(PolygonSequence).filter(PolygonSequence.FK_session_id==session.id).all()
         volume = {}
         volume['coordinate']=[[i.x,i.y,i.z] for i in volume_points]
-        volume['point_ordering']=[[i.point_order] for i in volume_points]
-        volume['polygon_ordering']=[[i.polygon_index] for i in volume_points]
+        volume['point_ordering']=[i.point_order for i in volume_points]
+        volume['polygon_ordering']=[i.polygon_index for i in volume_points]
         volume = pd.DataFrame(volume)
         volume = volume.sort_values('polygon_ordering')
         return volume
