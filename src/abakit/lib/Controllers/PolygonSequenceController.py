@@ -11,7 +11,7 @@ class PolygonSequenceController(Controller):
         active_sessions = self.session.query(AnnotationSession)\
             .filter(AnnotationSession.annotation_type==AnnotationType.POLYGON_SEQUENCE)\
             .filter(AnnotationSession.active==1).all()
-        information = [[i.FK_prep_id,i.user,i.brain_region.abbreviation] for i in active_sessions]
+        information = [[i.FK_prep_id,i.user.first_name,i.brain_region.abbreviation] for i in active_sessions]
         return np.unique(information)
     
     def get_volume(self,prep_id,annotator_id,structure_id):
