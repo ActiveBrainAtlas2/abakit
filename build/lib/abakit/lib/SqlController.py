@@ -9,7 +9,7 @@ from abakit.lib.sql_setup import session, pooledsession
 from abakit.model.file_log import FileLog
 from abakit.model.urlModel import UrlModel
 from abakit.model.task import Task, ProgressLookup
-from abakit.model.annotations_points import AnnotationPoint
+from abakit.model.annotation_points import AnnotationPoint
 from abakit.model.brain_region import BrainRegion
 from abakit.model.slide_czi_to_tif import SlideCziTif
 from abakit.model.slide import Slide
@@ -259,7 +259,7 @@ class SqlController(object):
         coord = []
         resolution = self.scan_run.resolution
         for resulti in query_result:
-            coord.append([resulti.x/resolution,resulti.y/resolution,int(resulti.section/20)])
+            coord.append([resulti.x/resolution,resulti.y/resolution,int(resulti.z/20)])
         return(np.array(coord))
 
     def get_structure_color(self, abbrv):
@@ -502,8 +502,9 @@ class SqlController(object):
         except Exception as e:
             print(f'No merge {e}')
             self.session.rollback()
-        finally:
-            self.session.close()
+    
+    def structure_exists(self,structurei):
+        return bool(self.session.query(BrainRegion).filter(BrainRegion.abbreviation==structurei).first())
         
     def add_url(self,content,title,person_id):
         url = UrlModel(url = content,comments = title,person_id = person_id)

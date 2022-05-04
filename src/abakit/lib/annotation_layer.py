@@ -45,7 +45,7 @@ class AnnotationLayer:
         self.annotations = np.array(annotations)
         self.group_annotations('polygon')
         # self.reorder_polygon_points()
-        self.check_polygon_points()
+        # self.check_polygon_points()
         self.group_annotations('volume')
     
     def parse_point(self, point_json):
@@ -172,8 +172,22 @@ class AnnotationLayer:
         point_json = {}
         ...
 
+class Annotation:
+    def is_point(self):
+        return self._type == 'point'
+    def is_polygon(self):
+        return self._type == 'polygon'
+    def is_volume(self):
+        return self._type == 'volume'
+    def is_line(self):
+        return self._type == 'line'
+    def get_description(self):
+        if hasattr(self,'description'):
+            return self.description
+        else:
+            return None
 
-class Point:
+class Point(Annotation):
     '''
     
     '''
@@ -188,7 +202,7 @@ class Point:
         ...
 
 
-class Line:
+class Line(Annotation):
     '''
     
     '''
@@ -206,7 +220,7 @@ class Line:
         ...
 
 
-class Polygon:
+class Polygon(Annotation):
     '''
     
     '''
@@ -241,7 +255,7 @@ class Polygon:
         section = int(np.floor(section))
         return section,contours2d
 
-class Volume:
+class Volume(Annotation):
     '''
     
     '''
@@ -341,6 +355,6 @@ def check_if_contour_points_are_in_order(first_point, start_points, end_points):
     assert len(start_points) == len(end_points)
     assert len(start_points[0]) == len(end_points[0]) == len(first_point) == 3
     assert np.all(first_point == start_points[0])
-    npoints = len(first_point)
+    npoints = len(start_points)
     for i in range(npoints - 1):
         assert np.all(np.isclose(start_points[i + 1], end_points[i],atol=0.1))
