@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, Integer, ForeignKey,Enum
 from sqlalchemy.sql.sqltypes import Float
 from abakit.model.atlas_model import Base
 from abakit.model.brain_region import BrainRegion
+from abakit.model.annotation_session import AnnotationSession
 import enum
 
 class AnnotationPoint(Base):
@@ -21,10 +22,9 @@ class AnnotationPoint(Base):
     y = Column(Float, nullable=False)
     z = Column(Float, nullable=False)
     ordering = Column(Integer)
-    
     brain_region = relationship('BrainRegion', lazy=True)
     active = Column(Integer)
-
+    session = relationship('AnnotationSession', lazy=True)
 
 class CellSources(enum.Enum):
     MACHINE_SURE = 'MACHINE-SURE'

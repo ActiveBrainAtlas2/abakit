@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, Integer, ForeignKey,Enum
 from sqlalchemy.sql.sqltypes import Float
 from abakit.model.atlas_model import Base
 from abakit.model.brain_region import BrainRegion
+from abakit.model.user import User
 import enum
 
 class AnnotationType(enum.Enum):
@@ -20,3 +21,6 @@ class AnnotationSession(Base):
     FK_structure_id = Column(Integer, ForeignKey('structure.id'), nullable=True)
     annotation_type = Column(Enum(AnnotationType))    
     brain_region = relationship('BrainRegion', lazy=True)
+    user = relationship('User', lazy=True)
+    active =  Column(Integer)
+
