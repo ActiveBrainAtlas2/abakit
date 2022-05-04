@@ -1,10 +1,10 @@
 import numpy as np
-from abakit.model.layer_data import LayerData
+from abakit.model.annotation_points import AnnotationPoint
 import json
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
 
-class LayerDataController(Controller):
+class AnnotationPointController(Controller):
 
     def __init__(self):
         super().__init__()
@@ -15,9 +15,9 @@ class LayerDataController(Controller):
         return query_result
 
     def get_layer_data(self,search_dictionary):
-        query_start = self.session.query(LayerData)
+        query_start = self.session.query(AnnotationPoint)
         for key, value in search_dictionary.items():
-            query_start = eval(f'query_start.filter(LayerData.{key}=="{value}")')
+            query_start = eval(f'query_start.filter(AnnotationPoint.{key}=="{value}")')
         return query_start.all()
     
     def add_layer_data(self, abbreviation, animal, layer, x, y, section, 
@@ -44,12 +44,12 @@ class LayerDataController(Controller):
         self.add_layer_data_row(animal,person_id,input_type_id,coordinates,structure_id,layer)
 
     def get_layer_data_entry(self, prep_id, input_type_id=1, person_id=2,active = True,layer = 'COM'):
-        rows = self.session.query(LayerData)\
-            .filter(LayerData.active.is_(active))\
-            .filter(LayerData.prep_id == prep_id)\
-            .filter(LayerData.input_type_id == input_type_id)\
-            .filter(LayerData.person_id == person_id)\
-            .filter(LayerData.layer == layer)\
+        rows = self.session.query(AnnotationPoint)\
+            .filter(AnnotationPoint.active.is_(active))\
+            .filter(AnnotationPoint.prep_id == prep_id)\
+            .filter(AnnotationPoint.input_type_id == input_type_id)\
+            .filter(AnnotationPoint.person_id == person_id)\
+            .filter(AnnotationPoint.layer == layer)\
             .all()
         row_dict = {}
         for row in rows:
@@ -60,7 +60,7 @@ class LayerDataController(Controller):
 
     def add_layer_data_row(self,animal,person_id,input_type_id,coordinates,structure_id,layer):
         x,y,z = coordinates
-        data = LayerData(prep_id = animal, person_id = person_id, input_type_id = input_type_id, x=x, y=y, \
+        data = AnnotationPoint(prep_id = animal, person_id = person_id, input_type_id = input_type_id, x=x, y=y, \
             section=z,structure_id=structure_id,layer=layer)
         self.add_row(data)
     
@@ -74,22 +74,22 @@ class LayerDataController(Controller):
             coordinates = coordinates,structure_id = structure_id,layer = 'COM')
     
     def layer_data_row_exists(self,animal, person_id, input_type_id, structure_id, layer):
-        row_exists = bool(self.session.query(LayerData).filter(
-            LayerData.prep_id == animal, 
-            LayerData.person_id == person_id, 
-            LayerData.input_type_id == input_type_id, 
-            LayerData.structure_id == structure_id,
-            LayerData.layer == layer).first())
+        row_exists = bool(self.session.query(AnnotationPoint).filter(
+            AnnotationPoint.prep_id == animal, 
+            AnnotationPoint.person_id == person_id, 
+            AnnotationPoint.input_type_id == input_type_id, 
+            AnnotationPoint.structure_id == structure_id,
+            AnnotationPoint.layer == layer).first())
         return row_exists
  
     def delete_layer_data_row(self,animal,person_id,input_type_id,structure_id,layer):
-        self.session.query(LayerData)\
-            .filter(LayerData.active.is_(True))\
-            .filter(LayerData.prep_id == animal)\
-            .filter(LayerData.input_type_id == input_type_id)\
-            .filter(LayerData.person_id == person_id)\
-            .filter(LayerData.structure_id == structure_id)\
-            .filter(LayerData.layer == layer).delete()
+        self.session.query(AnnotationPoint)\
+            .filter(AnnotationPoint.active.is_(True))\
+            .filter(AnnotationPoint.prep_id == animal)\
+            .filter(AnnotationPoint.input_type_id == input_type_id)\
+            .filter(AnnotationPoint.person_id == person_id)\
+            .filter(AnnotationPoint.structure_id == structure_id)\
+            .filter(AnnotationPoint.layer == layer).delete()
         self.session.commit()
     
     def get_com_dict(self, prep_id, input_type_id=1, person_id=2,active = True):
@@ -144,9 +144,9 @@ class LayerDataController(Controller):
         return result
     
     def get_annotated_animals(self):
-        results = self.session.query(LayerData)\
-            .filter(LayerData.active.is_(True))\
-            .filter(LayerData.input_type_id == 1)\
-            .filter(LayerData.person_id == 2)\
-            .filter(LayerData.layer == 'COM').all()
+        results = self.session.query(AnnotationPoint)\
+            .filter(AnnotationPoint.active.is_(True))\
+            .filter(AnnotationPoint.input_type_id == 1)\
+            .filter(AnnotationPoint.person_id == 2)\
+            .filter(AnnotationPoint.layer == 'COM').all()
         return np.unique([ri.prep_id for ri in results])
