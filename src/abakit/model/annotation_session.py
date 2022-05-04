@@ -24,8 +24,9 @@ class AnnotationSession(Base):
     user = relationship('User', lazy=True)
     active =  Column(Integer)
 
-    def get_available_volumes_sessions(self):
-        active_sessions = self.session.query(self).filter(self.annotation_type==self.POLYGON_SEQUENCE)\
-            .filter(self.active==1).all()
-        return active_sessions
+def get_available_volumes_sessions():
+    active_sessions = AnnotationSession.session.query(AnnotationSession).\
+        filter(AnnotationSession.annotation_type==AnnotationType.POLYGON_SEQUENCE)\
+        .filter(AnnotationSession.active==1).all()
+    return active_sessions
 
