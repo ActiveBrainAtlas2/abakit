@@ -12,7 +12,7 @@ class AnnotationPoint(Base):
     id =  Column(Integer, primary_key=True, nullable=False)
     prep_id = Column(String, nullable=False)
     FK_input_id = Column(Integer)
-    FK_owner_id = Column(Integer)
+    FK_owner_id = Column(Integer, ForeignKey('auth_user.id'), nullable=True)
     FK_structure_id = Column(Integer, ForeignKey('structure.id'), nullable=True)
     label = Column(String, nullable=False)
     polygon_id = Column(String, nullable=True)
@@ -22,9 +22,8 @@ class AnnotationPoint(Base):
     y = Column(Float, nullable=False)
     z = Column(Float, nullable=False)
     ordering = Column(Integer)
-    brain_region = relationship('BrainRegion', lazy=True)
     active = Column(Integer)
-    session = relationship('AnnotationSession', lazy=True)
+    brain_region = relationship('BrainRegion', lazy=True)
 
 class CellSources(enum.Enum):
     MACHINE_SURE = 'MACHINE-SURE'
@@ -41,6 +40,7 @@ class MarkedCell(Base):
     source = Column(Enum(CellSources))    
     FK_session_id = Column(Integer, ForeignKey('annotation_session.id'), nullable=True)
     FK_cell_type_id = Column(Integer, ForeignKey('cell_type.id'), nullable=True)
+    session = relationship('AnnotationSession', lazy=True)
 
 class COMSources(enum.Enum):
     MANUAL = 'MANUAL'
@@ -54,6 +54,7 @@ class StructureCOM(Base):
     z = Column(Float, nullable=False)
     source = Column(Enum(COMSources))    
     FK_session_id = Column(Integer, ForeignKey('annotation_session.id'), nullable=True)
+    session = relationship('AnnotationSession', lazy=True)
 
 class PolygonSources(enum.Enum):
     NA = 'NA'
@@ -68,3 +69,4 @@ class PolygonSequence(Base):
     FK_session_id = Column(Integer, ForeignKey('annotation_session.id'), nullable=True)
     polygon_index = Column(Integer)
     point_order = Column(Integer)
+    session = relationship('AnnotationSession', lazy=True)
