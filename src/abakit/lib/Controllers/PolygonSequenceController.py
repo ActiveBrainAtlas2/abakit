@@ -11,6 +11,17 @@ class PolygonSequenceController(Controller):
         return information
     
     def get_volume(self,prep_id,annotator_id,structure_id):
+        """Returns the points in a brain region volume
+
+        Args:
+            prep_id (str): Animal ID
+            annotator_id (int): Annotator ID
+            structure_id (int): Structure ID
+
+        Returns:
+            dictionary: points in a volume grouped by polygon.
+        """        
+        #TODO finish this function
         session = self.session.query(AnnotationSession)\
             .filter(AnnotationSession.FK_prep_id==prep_id)\
             .filter(AnnotationSession.FK_annotator_id==annotator_id)\
@@ -30,6 +41,11 @@ class PolygonSequenceController(Controller):
         return volume
     
     def get_available_volumes_sessions(self):
+        """retruns a list of available session objects that is currently active in the database
+
+        Returns:
+            list: list of volume sessions
+        """        
         active_sessions = self.session.query(AnnotationSession).\
             filter(AnnotationSession.annotation_type==AnnotationType.POLYGON_SEQUENCE)\
             .filter(AnnotationSession.active==1).all()

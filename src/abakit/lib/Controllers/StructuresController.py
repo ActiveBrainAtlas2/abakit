@@ -32,9 +32,19 @@ class StructuresController(Controller):
         return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
     def get_structures(self):
+        """return a list of active structures
+
+        Returns:
+            list: list of structure ORM
+        """        
         return self.session.query(Structure).filter(Structure.active.is_(True)).all()
 
-    def get_structures_dict(self):
+    def get_structure_description_and_color(self):
+        """returns the dictionary of structure abbreviation,description and color
+
+        Returns:
+            dict: dictionary of structure description and color indexes by structure abbreviation
+        """        
         rows = self.session.query(Structure)\
             .filter(Structure.abbreviation != 'R')\
             .filter(Structure.is_structure ==1).filter(
@@ -46,20 +56,11 @@ class StructuresController(Controller):
 
         return structures_dict
 
-    def get_structures_list(self):
-        rows = self.session.query(Structure).filter(Structure.id<52)\
-                .filter(Structure.abbreviation != 'R').filter(Structure.active.is_(
-            True)).order_by(Structure.abbreviation.asc()).all()
-        structures = []
-        for structure in rows:
-            structures.append(structure.abbreviation)
-
-        return structures
-
     def get_sided_structures(self):
         """
-        Not sure when/if this is needed, but will only return sided structures
-        :return: list of structures that are not singules
+        Return a list of sided structures
+        :return: list of structures that exists as pairs on both side of the brain. 
+        i.e. structures that is not in the midline
         """
         rows = self.session.query(Structure).filter(
             Structure.active.is_(True)).all()
@@ -72,7 +73,7 @@ class StructuresController(Controller):
 
     def get_structure(self, abbrv):
         """
-        Returns a structure
+        Returns a structure ORM object
         This search has to be case sensitive!
         :param abbrv: the abbreviation of the structure
         :return: structure object
