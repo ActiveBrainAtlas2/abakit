@@ -23,6 +23,10 @@ class PolygonSequenceController(Controller):
         volume['polygon_ordering']=[i.polygon_index for i in volume_points]
         volume = pd.DataFrame(volume)
         volume = volume.sort_values('polygon_ordering')
+        for polygoni in volume.polygon_ordering.unique():
+            polygoni = volume[volume.polygon_ordering==polygoni]
+            polygoni.sort_values('point_ordering')
+            ...
         return volume
     
     def get_available_volumes_sessions(self):

@@ -3,17 +3,36 @@ from SimpleITK.SimpleITK import Transform
 import numpy as np
 
 class Transformation:
-
+    """a wrapper around sitk transformations to transform point sets
+    """
+    #TODO this does not work with the affine transformation type right now.  Sitk objects are hard to pickle, the method 
+    # we have right now circumvent this for the rigid transformation but not for affine
     def __init__(self,fixed_and_regular_parameters,type):
         self.fixed_and_regular_parameters = fixed_and_regular_parameters
         self.type = type
     
     def inverse_transform_points(self,points):
+        """inverse transform a set of points
+
+        Args:
+            points (array like): list pf x,y,z coordinate
+
+        Returns:
+            array like: list of transformed x,y,z coordinates
+        """        
         self.create_inverse_transform()
         transformed_points = self.transform_points(points,self.inverse_transform.TransformPoint)
         return transformed_points
     
     def forward_transform_points(self,points):
+        """Forward transforms the points
+
+        Args:
+            points (array like): list of x,y,z, coordinates
+
+        Returns:
+            array like: list of x,t,z coordinate after forward transformation
+        """        
         self.create_transform()
         transformed_points = self.transform_points(points,self.transform.TransformPoint)
         return transformed_points
@@ -38,12 +57,20 @@ class Transformation:
         return transformed_points
     
     def create_inverse_transform(self):
+        """create the inverse transform as needed from the forward transform
+
+        Returns:
+            sitk transform: the inverse transform
+        """        
         self.create_transform()
         if not hasattr(self,'inverse_transform'):
             self.inverse_transform = self.transform.GetInverse()
         return self.inverse_transform
     
     def create_transform(self):
+        """create the transformation as needed from the fixed and regular parameters.
+           this is needed as sitk does not play nicely with pickling
+        """        
         if not hasattr(self,'transform'):
             self.transform = self.type()
             self.transform.SetFixedParameters(self.fixed_and_regular_parameters[0])
