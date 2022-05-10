@@ -275,7 +275,7 @@ class Volume(Annotation):
         for childi in self.childs:
             section,contours = childi.get_section_and_2d_contours()
             volume_contours[section] = contours
-        assert len(self.childs) == len(volume_contours.keys())
+        # assert len(self.childs) == len(volume_contours.keys())
         return self.description,volume_contours
     
     def to_dict(self):
