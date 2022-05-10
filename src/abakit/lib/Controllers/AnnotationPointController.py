@@ -5,72 +5,99 @@ import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
 
 class AnnotationPointController(Controller):
-
+    """This class is about to be depricated as the annotation points table are to be split into the PolygonSequence,
+       StructureCom and MarkedCells table
+    """
     def __init__(self):
         super().__init__()
 
-    def get_values_from_column(self, query_result):
-        query_result = query_result.all()
-        query_result = [entryi[0] for entryi in query_result]
-        return query_result
+    def get_annotation_points_orm(self,search_dictionary):
+        """The main function for querying the annoataion points table
 
-    def get_layer_data(self,search_dictionary):
-        query_start = self.session.query(AnnotationPoint)
-        for key, value in search_dictionary.items():
-            query_start = eval(f'query_start.filter(AnnotationPoint.{key}=="{value}")')
-        return query_start.all()
-    
-    def add_layer_data(self, abbreviation, animal, layer, x, y, section, 
-                       person_id, input_type_id):
-        """
-        Look up the structure id from the structure.
         Args:
-            structure: abbreviation with the _L or _R ending
-            animal: prep_id
-            x=float of x coordinate
-            y=float of y coordinate
-            section = int of z/section coordinate
-        Returns:
-            nothing, just merges
-        try:
-            structure = self.session.query(Structure) \
-                .filter(Structure.abbreviation == func.binary(abbreviation)).one()
-        except NoResultFound:
-            print(f'No structure for {abbreviation}')
-        """
+            search_dictionary (dict): column name and value pair for the search
 
+        Returns:
+            list: list of sqlalchemy ORM objects
+        """        
+        return self.query_table(search_dictionary,AnnotationPoint)
+    
+    def add_annotation_points(self, abbreviation, animal, layer, x, y, section, 
+                       person_id, input_type_id):
+        """adding a row to annotation points table
+
+        Args:
+            abbreviation (string): structure name short hand
+            animal (string): animal name
+            layer (string): layer name
+            x (float): x coordinate
+            y (float): y coordinate
+            section (int): z section number
+            person_id (int): id of annotator 
+            input_type_id (int): id of input type
+        """
         structure_id = self.structure_abbreviation_to_id(abbreviation)
         coordinates = (x,y,section)
-        self.add_layer_data_row(animal,person_id,input_type_id,coordinates,structure_id,layer)
+        self.add_annotation_points(animal,person_id,input_type_id,coordinates,structure_id,layer)
 
-    def get_layer_data_entry(self, prep_id, input_type_id=1, person_id=2,active = True,layer = 'COM'):
-        rows = self.session.query(AnnotationPoint)\
-            .filter(AnnotationPoint.active.is_(active))\
-            .filter(AnnotationPoint.prep_id == prep_id)\
-            .filter(AnnotationPoint.input_type_id == input_type_id)\
-            .filter(AnnotationPoint.person_id == person_id)\
-            .filter(AnnotationPoint.layer == layer)\
-            .all()
-        row_dict = {}
+    def get_annotation_points(self, prep_id, input_type_id=1, person_id=2,active = True,layer = 'COM'):
+        """function to obtain coordinates of annotation points
+
+        Args:
+            prep_id (str): Animal ID
+            input_type_id (int, optional): int for input type. Defaults to 1.
+            person_id (int, optional): annotation id. Defaults to 2.
+            active (bool, optional): search of active or inactive annotations. Defaults to True.
+            layer (str, optional): layer name. Defaults to 'COM'.
+
+        Returns:
+            _type_: _description_
+        """        
+        search_dictionary=dict( prep_id = prep_id,
+                                input_type_id = input_type_id,
+                                person_id = person_id,
+                                layer = layer,
+                                active=0)
+        rows = self.get_annotation_points_orm(search_dictionary)
+        search_result = {}
         for row in rows:
             structure = row.structure.abbreviation
-            row_dict[structure] = [row.x, row.y, row.section]
-        return row_dict
+            search_result[structure] = [row.x, row.y, row.section]
+        return search_result
 
 
-    def add_layer_data_row(self,animal,person_id,input_type_id,coordinates,structure_id,layer):
+    def add_annotation_points(self,animal,person_id,input_type_id,coordinates,structure_id,layer):
+        """adding a row to the annotation points table
+
+        Args:
+            animal (str): Animal ID
+            person_id (int): Annotator ID
+            input_type_id (int): Input Type ID
+            coordinates (list): list of x,y,z coordinates
+            structure_id (int): Structure ID
+            layer (str): layer name
+        """        
         x,y,z = coordinates
         data = AnnotationPoint(prep_id = animal, person_id = person_id, input_type_id = input_type_id, x=x, y=y, \
             section=z,structure_id=structure_id,layer=layer)
         self.add_row(data)
     
     def add_com(self, prep_id, abbreviation, coordinates, person_id=2 , input_type_id = 1):
+        """Adding a Com Entry
+
+        Args:
+            prep_id (str): Animal ID
+            abbreviation (str): structure abbreviation
+            coordinates (list): list of x,y,z coordinates
+            person_id (int, optional): Annotator ID. Defaults to 2.
+            input_type_id (int, optional): Input Type ID. Defaults to 1.
+        """        
         structure_id = self.structure_abbreviation_to_id(abbreviation)
         if self.layer_data_row_exists(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
             structure_id = structure_id,layer = 'COM'):
             self.delete_layer_data_row(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
                 structure_id = structure_id,layer = 'COM')
-        self.add_layer_data_row(animal = prep_id,person_id = person_id,input_type_id = input_type_id,\
+        self.add_annotation_points(animal = prep_id,person_id = person_id,input_type_id = input_type_id,\
             coordinates = coordinates,structure_id = structure_id,layer = 'COM')
     
     def layer_data_row_exists(self,animal, person_id, input_type_id, structure_id, layer):
@@ -93,7 +120,7 @@ class AnnotationPointController(Controller):
         self.session.commit()
     
     def get_com_dict(self, prep_id, input_type_id=1, person_id=2,active = True):
-        return self.get_layer_data_entry( prep_id = prep_id, input_type_id=input_type_id,\
+        return self.get_annotation_points( prep_id = prep_id, input_type_id=input_type_id,\
              person_id=person_id,active = active,layer = 'COM')
 
     def get_atlas_centers(self):

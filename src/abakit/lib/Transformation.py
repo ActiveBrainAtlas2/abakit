@@ -3,16 +3,37 @@ from SimpleITK.SimpleITK import Transform
 import numpy as np
 
 class Transformation:
-
-    def __init__(self,transform):
-        self.transform = transform
+    """a wrapper around sitk transformations to transform point sets
+    """
+    #TODO this does not work with the affine transformation type right now.  Sitk objects are hard to pickle, the method 
+    # we have right now circumvent this for the rigid transformation but not for affine
+    def __init__(self,fixed_and_regular_parameters,type):
+        self.fixed_and_regular_parameters = fixed_and_regular_parameters
+        self.type = type
     
     def inverse_transform_points(self,points):
-        _ = self.get_inverse_transform()
+        """inverse transform a set of points
+
+        Args:
+            points (array like): list pf x,y,z coordinate
+
+        Returns:
+            array like: list of transformed x,y,z coordinates
+        """        
+        self.create_inverse_transform()
         transformed_points = self.transform_points(points,self.inverse_transform.TransformPoint)
         return transformed_points
     
     def forward_transform_points(self,points):
+        """Forward transforms the points
+
+        Args:
+            points (array like): list of x,y,z, coordinates
+
+        Returns:
+            array like: list of x,t,z coordinate after forward transformation
+        """        
+        self.create_transform()
         transformed_points = self.transform_points(points,self.transform.TransformPoint)
         return transformed_points
 
@@ -21,6 +42,8 @@ class Transformation:
         transform: and instance of SimpleITK.SimpleITK.Transform
         points: a numpy array of shape (number of points) X (number of dimensions)
         return moved: a numpy array of the same shape as points"""
+        points = np.array(points)
+        self.create_transform()
         transpose = False
         if points.shape[1] != 3 and points.shape[0] == 3:
             points = points.T
@@ -28,12 +51,27 @@ class Transformation:
         npoints,_=points.shape
         transformed_points=np.zeros(points.shape)
         for pointi in range(npoints):
-            transformed_points[pointi]=tranform_function(points[pointi,:])
+            transformed_points[pointi]=tranform_function(points[pointi,:].tolist())
         if transpose:
             transformed_points = transformed_points.T
         return transformed_points
     
-    def get_inverse_transform(self):
+    def create_inverse_transform(self):
+        """create the inverse transform as needed from the forward transform
+
+        Returns:
+            sitk transform: the inverse transform
+        """        
+        self.create_transform()
         if not hasattr(self,'inverse_transform'):
             self.inverse_transform = self.transform.GetInverse()
         return self.inverse_transform
+    
+    def create_transform(self):
+        """create the transformation as needed from the fixed and regular parameters.
+           this is needed as sitk does not play nicely with pickling
+        """        
+        if not hasattr(self,'transform'):
+            self.transform = self.type()
+            self.transform.SetFixedParameters(self.fixed_and_regular_parameters[0])
+            self.transform.SetParameters(self.fixed_and_regular_parameters[1])

@@ -27,7 +27,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class SqlController(ElasticsController,LayerDataController,StructuresController,TransformationController,UrlController):
-    """ Create a class for processing the pipeline,
+    """ This is the old sql_controller class.  This is a huge class and we are in the process of breaking it up into smaller
+        components.  Each parent class of SqlController would correspond to one table in the database, and include all the 
+        methods to interact with that table
     """
 
     def __init__(self, animal):

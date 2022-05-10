@@ -1,3 +1,6 @@
+"""This file sets up the sqalchemy session with the correct credentials,
+    the credentials are provided in the settings.py file
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
