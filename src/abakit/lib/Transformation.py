@@ -72,7 +72,7 @@ class Transformation:
            this is needed as sitk does not play nicely with pickling
         """        
         if not hasattr(self,'transform'):
-            self.transform = eval(self.type+'()')
+            self.transform = eval(self.type)
             self.transform.SetFixedParameters(self.fixed_and_regular_parameters[0])
             self.transform.SetParameters(self.fixed_and_regular_parameters[1])
     
