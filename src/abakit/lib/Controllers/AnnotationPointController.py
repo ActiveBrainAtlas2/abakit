@@ -22,41 +22,41 @@ class AnnotationPointController(Controller):
         """        
         return self.query_table(search_dictionary,AnnotationPoint)
     
-    def add_annotation_points(self, abbreviation, animal, layer, x, y, section, 
-                       person_id, input_type_id):
+    def add_annotation_points(self, abbreviation, animal, label, x, y, section, 
+                       FK_owner_id, FK_input_id):
         """adding a row to annotation points table
 
         Args:
             abbreviation (string): structure name short hand
             animal (string): animal name
-            layer (string): layer name
+            label (string): label name
             x (float): x coordinate
             y (float): y coordinate
             section (int): z section number
-            person_id (int): id of annotator 
-            input_type_id (int): id of input type
+            FK_owner_id (int): id of annotator 
+            FK_input_id (int): id of input type
         """
-        structure_id = self.structure_abbreviation_to_id(abbreviation)
+        FK_structure_id = self.structure_abbreviation_to_id(abbreviation)
         coordinates = (x,y,section)
-        self.add_annotation_points(animal,person_id,input_type_id,coordinates,structure_id,layer)
+        self.add_annotation_points(animal,FK_owner_id,FK_input_id,coordinates,FK_structure_id,label)
 
-    def get_annotation_points(self, prep_id, input_type_id=1, person_id=2,active = True,layer = 'COM'):
+    def get_annotation_points(self, prep_id, FK_input_id=1, FK_owner_id=2,active = 1,label = 'COM'):
         """function to obtain coordinates of annotation points
 
         Args:
             prep_id (str): Animal ID
-            input_type_id (int, optional): int for input type. Defaults to 1.
-            person_id (int, optional): annotation id. Defaults to 2.
+            FK_input_id (int, optional): int for input type. Defaults to 1.
+            FK_owner_id (int, optional): annotation id. Defaults to 2.
             active (bool, optional): search of active or inactive annotations. Defaults to True.
-            layer (str, optional): layer name. Defaults to 'COM'.
+            label (str, optional): label name. Defaults to 'COM'.
 
         Returns:
             _type_: _description_
         """        
         search_dictionary=dict( prep_id = prep_id,
-                                input_type_id = input_type_id,
-                                person_id = person_id,
-                                layer = layer,
+                                FK_input_id = FK_input_id,
+                                FK_owner_id = FK_owner_id,
+                                label = label,
                                 active=0)
         rows = self.get_annotation_points_orm(search_dictionary)
         search_result = {}
@@ -66,67 +66,67 @@ class AnnotationPointController(Controller):
         return search_result
 
 
-    def add_annotation_points(self,animal,person_id,input_type_id,coordinates,structure_id,layer):
+    def add_annotation_points(self,animal,FK_owner_id,FK_input_id,coordinates,FK_structure_id,label):
         """adding a row to the annotation points table
 
         Args:
             animal (str): Animal ID
-            person_id (int): Annotator ID
-            input_type_id (int): Input Type ID
+            FK_owner_id (int): Annotator ID
+            FK_input_id (int): Input Type ID
             coordinates (list): list of x,y,z coordinates
-            structure_id (int): Structure ID
-            layer (str): layer name
+            FK_structure_id (int): Structure ID
+            label (str): label name
         """        
         x,y,z = coordinates
-        data = AnnotationPoint(prep_id = animal, person_id = person_id, input_type_id = input_type_id, x=x, y=y, \
-            section=z,structure_id=structure_id,layer=layer)
+        data = AnnotationPoint(prep_id = animal, FK_owner_id = FK_owner_id, FK_input_id = FK_input_id, x=x, y=y, \
+            section=z,FK_structure_id=FK_structure_id,label=label)
         self.add_row(data)
     
-    def add_com(self, prep_id, abbreviation, coordinates, person_id=2 , input_type_id = 1):
+    def add_com(self, prep_id, abbreviation, coordinates, FK_owner_id=2 , FK_input_id = 1):
         """Adding a Com Entry
 
         Args:
             prep_id (str): Animal ID
             abbreviation (str): structure abbreviation
             coordinates (list): list of x,y,z coordinates
-            person_id (int, optional): Annotator ID. Defaults to 2.
-            input_type_id (int, optional): Input Type ID. Defaults to 1.
+            FK_owner_id (int, optional): Annotator ID. Defaults to 2.
+            FK_input_id (int, optional): Input Type ID. Defaults to 1.
         """        
-        structure_id = self.structure_abbreviation_to_id(abbreviation)
-        if self.layer_data_row_exists(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
-            structure_id = structure_id,layer = 'COM'):
-            self.delete_layer_data_row(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
-                structure_id = structure_id,layer = 'COM')
-        self.add_annotation_points(animal = prep_id,person_id = person_id,input_type_id = input_type_id,\
-            coordinates = coordinates,structure_id = structure_id,layer = 'COM')
+        FK_structure_id = self.structure_abbreviation_to_id(abbreviation)
+        if self.label_data_row_exists(animal=prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
+            FK_structure_id = FK_structure_id,label = 'COM'):
+            self.delete_label_data_row(animal=prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
+                FK_structure_id = FK_structure_id,label = 'COM')
+        self.add_annotation_points(animal = prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
+            coordinates = coordinates,FK_structure_id = FK_structure_id,label = 'COM')
     
-    def layer_data_row_exists(self,animal, person_id, input_type_id, structure_id, layer):
+    def label_data_row_exists(self,animal, FK_owner_id, FK_input_id, FK_structure_id, label):
         row_exists = bool(self.session.query(AnnotationPoint).filter(
             AnnotationPoint.prep_id == animal, 
-            AnnotationPoint.person_id == person_id, 
-            AnnotationPoint.input_type_id == input_type_id, 
-            AnnotationPoint.structure_id == structure_id,
-            AnnotationPoint.layer == layer).first())
+            AnnotationPoint.FK_owner_id == FK_owner_id, 
+            AnnotationPoint.FK_input_id == FK_input_id, 
+            AnnotationPoint.FK_structure_id == FK_structure_id,
+            AnnotationPoint.label == label).first())
         return row_exists
  
-    def delete_layer_data_row(self,animal,person_id,input_type_id,structure_id,layer):
+    def delete_label_data_row(self,animal,FK_owner_id,FK_input_id,FK_structure_id,label):
         self.session.query(AnnotationPoint)\
             .filter(AnnotationPoint.active.is_(True))\
             .filter(AnnotationPoint.prep_id == animal)\
-            .filter(AnnotationPoint.input_type_id == input_type_id)\
-            .filter(AnnotationPoint.person_id == person_id)\
-            .filter(AnnotationPoint.structure_id == structure_id)\
-            .filter(AnnotationPoint.layer == layer).delete()
+            .filter(AnnotationPoint.FK_input_id == FK_input_id)\
+            .filter(AnnotationPoint.FK_owner_id == FK_owner_id)\
+            .filter(AnnotationPoint.FK_structure_id == FK_structure_id)\
+            .filter(AnnotationPoint.label == label).delete()
         self.session.commit()
     
-    def get_com_dict(self, prep_id, input_type_id=1, person_id=2,active = True):
-        return self.get_annotation_points( prep_id = prep_id, input_type_id=input_type_id,\
-             person_id=person_id,active = active,layer = 'COM')
+    def get_com_dict(self, prep_id, FK_input_id=1, FK_owner_id=2,active = 1):
+        return self.get_annotation_points( prep_id = prep_id, FK_input_id=FK_input_id,\
+             FK_owner_id=FK_owner_id,active = active,label = 'COM')
 
     def get_atlas_centers(self):
-        PERSON_ID_LAUREN = 16
+        FK_owner_id_LAUREN = 16
         INPUT_TYPE_MANUAL = 1
-        return self.get_com_dict('Atlas',INPUT_TYPE_MANUAL,PERSON_ID_LAUREN)
+        return self.get_com_dict('Atlas',INPUT_TYPE_MANUAL,FK_owner_id_LAUREN)
     
     def get_point_dataframe(self, id):
         """
@@ -148,8 +148,8 @@ class AnnotationPointController(Controller):
         dfs = []
         if urlModel.url is not None:
             json_txt = json.loads(urlModel.url)
-            layers = json_txt['layers']
-            for l in layers:
+            labels = json_txt['labels']
+            for l in labels:
                 if 'annotations' in l:
                     name = l['name']
                     annotation = l['annotations']
@@ -158,8 +158,8 @@ class AnnotationPointController(Controller):
                     df['X'] = df['X'].astype(int)
                     df['Y'] = df['Y'].astype(int)
                     df['Section'] = df['Section'].astype(int)
-                    df['Layer'] = name
-                    df = df[['Layer', 'X', 'Y', 'Section']]
+                    df['label'] = name
+                    df = df[['label', 'X', 'Y', 'Section']]
                     dfs.append(df)
             if len(dfs) == 0:
                 result = None
@@ -173,7 +173,7 @@ class AnnotationPointController(Controller):
     def get_annotated_animals(self):
         results = self.session.query(AnnotationPoint)\
             .filter(AnnotationPoint.active.is_(True))\
-            .filter(AnnotationPoint.input_type_id == 1)\
-            .filter(AnnotationPoint.person_id == 2)\
-            .filter(AnnotationPoint.layer == 'COM').all()
+            .filter(AnnotationPoint.FK_input_id == 1)\
+            .filter(AnnotationPoint.FK_owner_id == 2)\
+            .filter(AnnotationPoint.label == 'COM').all()
         return np.unique([ri.prep_id for ri in results])

@@ -36,33 +36,115 @@ class FileLocationManager(object):
         self.segmentation_layer = os.path.join(self.root, 'structures')
     
     def get_full(self,channel=1):
+        """returns the directory to the full resolution tiff files
+
+        Args:
+            channel (int, optional): channel number for which the files are considered. Defaults to 1.
+
+        Returns:
+            str: path to the full size tiff folder
+        """        
         return os.path.join(self.prep, f'CH{channel}', 'full')
     
     def get_thumbnail(self,channel=1):
+        """returns the path to the downsampeld tiff files
+
+        Args:
+            channel (int, optional): The channel in question. Defaults to 1.
+
+        Returns:
+            str: path to the downsampled tiff files 
+        """        
         return os.path.join(self.prep, f'CH{channel}', 'thumbnail')
 
     def get_elastix(self,channel = 1):
+        """get the path to files storing the elastixs transformation.  This is likely depricated
+
+        Args:
+            channel (int, optional): channel in question. Defaults to 1.
+
+        Returns:
+            str: path to the elastix file
+        """        
         return os.path.join(self.prep,f'CH{channel}','elastix')
     
     def get_full_cleaned(self,channel = 1):
+        """get the full resolution tiff files where the debrie around the tissue has been cleaned
+
+        Args:
+            channel (int, optional): the channel in question. Defaults to 1.
+
+        Returns:
+            str: the path to full sized cleaned images
+        """        
         return os.path.join(self.prep,f'CH{channel}','full_cleaned')
     
     def get_full_aligned(self,channel = 1):
+        """Get path to full resolution images after within stack alignment
+
+        Args:
+            channel (int, optional): channel number. Defaults to 1.
+
+        Returns:
+            str: path to the full resolution within stack aligned images
+        """        
         return os.path.join(self.prep,f'CH{channel}','full_aligned')
     
     def get_thumbnail_aligned(self,channel = 1):
+        """get downsampled aligned images
+
+        Args:
+            channel (int, optional): channel number. Defaults to 1.
+
+        Returns:
+            str: path to downsampled aligned images
+        """        
         return os.path.join(self.prep, f'CH{channel}', 'thumbnail_aligned')
         
     def get_thumbnail_cleaned(self,channel = 1):
+        """get path to downsampled cleaned images
+
+        Args:
+            channel (int, optional): channel number . Defaults to 1.
+
+        Returns:
+            str: path to downsampled cleaned images
+        """        
         return os.path.join(self.prep,f'CH{channel}', 'thumbnail_cleaned')
     
     def get_normalized(self,channel = 1):
+        """get path to normalized images
+
+        Args:
+            channel (int, optional): channel number. Defaults to 1.
+
+        Returns:
+            str: path to normalized images
+        """        
         return os.path.join(self.prep, f'CH{channel}', 'normalized')
 
     def get_histogram(self,channel = 1):
+        """get the histogram of pixel intensity for the images
+
+        Args:
+            channel (int, optional): channel number. Defaults to 1.
+
+        Returns:
+            str: file path
+        """
         return os.path.join(self.histogram, f'CH{channel}')
     
     def get_neuroglancer(self,downsample = True, channel = 1,rechunck = False):
+        """get path to cloud volume neuroglancer neuroglancer image layer files
+
+        Args:
+            downsample (bool, optional): if the neuroglancer cloud volume is for downsampled image. Defaults to True.
+            channel (int, optional): channel number. Defaults to 1.
+            rechunck (bool, optional): whether rechunking is performed. Defaults to False.
+
+        Returns:
+            str: path of the cloudvolume neuroglancer image layer
+        """        
         if downsample:
             channel_outdir = f'C{channel}T'
         else:

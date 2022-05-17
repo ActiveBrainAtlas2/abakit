@@ -75,3 +75,31 @@ class Transformation:
             self.transform = self.type()
             self.transform.SetFixedParameters(self.fixed_and_regular_parameters[0])
             self.transform.SetParameters(self.fixed_and_regular_parameters[1])
+    
+    def forward_transform_volume(self,volume):
+        volume = self.transform_volume(volume,self.transform)
+        return volume
+    
+    def inverse_transform_volume(self,volume):
+        volume = self.transform_volume(volume,self.inverse_transform)
+        return volume        
+    
+    def transform_volume(self,volume,itk_tranform_object):
+        volume = volume.copy()
+        structures = list(volume.origins.keys())
+        for structurei in structures:
+            origin = volume.origins[structurei]
+            volume = volume.volumes[structurei]
+            volume.origins[structurei] = itk_tranform_object.TransformPoint(origin)
+            volume.volumes[structurei] = self.transform_np_array(volume,itk_tranform_object)
+        return volume
+    
+    def transform_np_array(self,volume, transform):
+        volume = sitk.GetImageFromArray(volume)
+        reference_image = volume
+        interpolator = sitk.sitkCosineWindowedSinc
+        default_value = 100.0
+        volume =  sitk.Resample(volume, reference_image, transform,
+                            interpolator, default_value)
+        volume = sitk.GetArrayFromImage(volume)
+        return volume
