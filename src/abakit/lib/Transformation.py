@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 from SimpleITK.SimpleITK import Transform
 import numpy as np
-
+from copy import copy
 class Transformation:
     """a wrapper around sitk transformations to transform point sets
     """
@@ -87,13 +87,13 @@ class Transformation:
         return volume        
     
     def transform_volume(self,volume,itk_tranform_object):
-        volume = volume.copy()
+        volume = copy(volume)
         structures = list(volume.origins.keys())
         for structurei in structures:
-            origin = volume.origins[structurei]
-            volume = volume.volumes[structurei]
-            volume.origins[structurei] = itk_tranform_object.TransformPoint(origin)
-            volume.volumes[structurei] = self.transform_np_array(volume,itk_tranform_object)
+            origini = volume.origins[structurei]
+            # volumei = volume.volumes[structurei]
+            volume.origins[structurei] = itk_tranform_object.TransformPoint(origini)
+            # volume.volumes[structurei] = self.transform_np_array(volumei,itk_tranform_object)
         return volume
     
     def transform_np_array(self,volume, transform):

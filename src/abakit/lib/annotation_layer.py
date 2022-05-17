@@ -369,7 +369,7 @@ class Volume(Annotation):
     def __str__(self):
         return "Polygon ID is %s, source is %s" % (self.id, self.source)
     
-    def get_volume_name_and_contours(self):
+    def get_volume_name_and_contours(self,downsample_factor = 1):
         """Get the name of volume and dictionary of contours
 
         Returns:
@@ -379,7 +379,7 @@ class Volume(Annotation):
         volume_contours = {}
         for childi in self.childs:
             section,contours = childi.get_section_and_2d_contours()
-            volume_contours[section] = contours
+            volume_contours[section] = contours/downsample_factor
         # assert len(self.childs) == len(volume_contours.keys())
         return self.description,volume_contours
     
