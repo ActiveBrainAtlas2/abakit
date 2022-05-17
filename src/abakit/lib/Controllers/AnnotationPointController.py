@@ -57,14 +57,13 @@ class AnnotationPointController(Controller):
                                 FK_input_id = FK_input_id,
                                 FK_owner_id = FK_owner_id,
                                 label = label,
-                                active=0)
+                                active=1)
         rows = self.get_annotation_points_orm(search_dictionary)
         search_result = {}
         for row in rows:
-            structure = row.structure.abbreviation
-            search_result[structure] = [row.x, row.y, row.section]
+            structure = row.brain_region.abbreviation
+            search_result[structure] = [row.x, row.y, row.z]
         return search_result
-
 
     def add_annotation_points(self,animal,FK_owner_id,FK_input_id,coordinates,FK_structure_id,label):
         """adding a row to the annotation points table
