@@ -77,10 +77,12 @@ class Transformation:
             self.transform.SetParameters(self.fixed_and_regular_parameters[1])
     
     def forward_transform_volume(self,volume):
+        self.create_transform()
         volume = self.transform_volume(volume,self.transform)
         return volume
     
     def inverse_transform_volume(self,volume):
+        self.create_inverse_transform()
         volume = self.transform_volume(volume,self.inverse_transform)
         return volume        
     
