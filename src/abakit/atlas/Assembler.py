@@ -34,16 +34,17 @@ class Assembler:
         row_end, col_end, z_end = self.max_bonds[structure_id]
         return row_start, col_start, z_start, row_end, col_end, z_end
     
-    def get_structure_dictionary(self):
+    def get_segment_to_id_where_segment_are_brain_regions(self):
         db_structure_infos = self.sqlController.get_structures_dict()
-        structure_to_id = {}
+        segment_to_id = {}
         for structure, (_, number) in db_structure_infos.items():
-            structure_to_id[structure] = number
-        return structure_to_id
+            segment_to_id[structure] = number
+        return segment_to_id
 
-    def assemble_all_structure_volume(self):
+    def assemble_all_structure_volume(self,segment_to_id = None):
         self.initialize_origins_and_volumes()
-        structure_to_id = self.get_structure_dictionary()
+        if segment_to_id is None:
+            segment_to_id = self.get_segment_to_id_where_segment_are_brain_regions()
         size = self.get_bounding_box()
         size = size + np.array([10, 10, 10])
         self.combined_volume = np.zeros(size, dtype=np.uint8)
@@ -52,9 +53,9 @@ class Assembler:
             volume = self.volumes[i]
             row_start, col_start, z_start, row_end, col_end, z_end = self.get_structure_boundary(i)
             try:
-                structure_id = structure_to_id[structure.split('_')[0]]
+                structure_id = segment_to_id[structure.split('_')[0]]
             except KeyError:
-                structure_id = structure_to_id[structure]
+                structure_id = segment_to_id[structure]
             try:
                 self.combined_volume[row_start:row_end, col_start:col_end, z_start:z_end] += volume.astype(np.uint8) * structure_id
             except ValueError as ve:

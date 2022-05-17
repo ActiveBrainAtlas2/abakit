@@ -76,23 +76,23 @@ class Transformation:
             self.transform.SetFixedParameters(self.fixed_and_regular_parameters[0])
             self.transform.SetParameters(self.fixed_and_regular_parameters[1])
     
-    def forward_transform_volume(self,volume):
+    def forward_transform_volume(self,volume,downsample_factor = 1):
         self.create_transform()
-        volume = self.transform_volume(volume,self.transform)
+        volume = self.transform_volume(volume,self.transform,downsample_factor)
         return volume
     
-    def inverse_transform_volume(self,volume):
+    def inverse_transform_volume(self,volume,downsample_factor = 1):
         self.create_inverse_transform()
-        volume = self.transform_volume(volume,self.inverse_transform)
+        volume = self.transform_volume(volume,self.inverse_transform,downsample_factor)
         return volume        
     
-    def transform_volume(self,volume,itk_tranform_object):
+    def transform_volume(self,volume,itk_tranform_object,downsample_factor = 1):
         volume = copy(volume)
         structures = list(volume.origins.keys())
         for structurei in structures:
-            origini = volume.origins[structurei]
+            origini = np.array(volume.origins[structurei])*downsample_factor
             # volumei = volume.volumes[structurei]
-            volume.origins[structurei] = itk_tranform_object.TransformPoint(origini)
+            volume.origins[structurei] = np.array(itk_tranform_object.TransformPoint(origini))/downsample_factor
             # volume.volumes[structurei] = self.transform_np_array(volumei,itk_tranform_object)
         return volume
     
