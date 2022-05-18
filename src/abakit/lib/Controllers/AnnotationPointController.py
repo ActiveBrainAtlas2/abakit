@@ -4,14 +4,16 @@ import json
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
 
+
 class AnnotationPointController(Controller):
     """This class is about to be depricated as the annotation points table are to be split into the PolygonSequence,
        StructureCom and MarkedCells table
     """
+
     def __init__(self):
         super().__init__()
 
-    def get_annotation_points_orm(self,search_dictionary):
+    def get_annotation_points_orm(self, search_dictionary):
         """The main function for querying the annoataion points table
 
         Args:
@@ -19,11 +21,11 @@ class AnnotationPointController(Controller):
 
         Returns:
             list: list of sqlalchemy ORM objects
-        """        
-        return self.query_table(search_dictionary,AnnotationPoint)
-    
-    def add_annotation_points(self, abbreviation, animal, label, x, y, section, 
-                       FK_owner_id, FK_input_id):
+        """
+        return self.query_table(search_dictionary, AnnotationPoint)
+
+    def add_annotation_points(self, abbreviation, animal, label, x, y, section,
+                              FK_owner_id, FK_input_id):
         """adding a row to annotation points table
 
         Args:
@@ -37,10 +39,11 @@ class AnnotationPointController(Controller):
             FK_input_id (int): id of input type
         """
         FK_structure_id = self.structure_abbreviation_to_id(abbreviation)
-        coordinates = (x,y,section)
-        self.add_annotation_points(animal,FK_owner_id,FK_input_id,coordinates,FK_structure_id,label)
+        coordinates = (x, y, section)
+        self.add_annotation_points(
+            animal, FK_owner_id, FK_input_id, coordinates, FK_structure_id, label)
 
-    def get_annotation_points(self, prep_id, FK_input_id=1, FK_owner_id=2,active = 1,label = 'COM'):
+    def get_annotation_points(self, prep_id, FK_input_id=1, FK_owner_id=2, active=1, label='COM'):
         """function to obtain coordinates of annotation points
 
         Args:
@@ -52,12 +55,12 @@ class AnnotationPointController(Controller):
 
         Returns:
             _type_: _description_
-        """        
-        search_dictionary=dict( prep_id = prep_id,
-                                FK_input_id = FK_input_id,
-                                FK_owner_id = FK_owner_id,
-                                label = label,
-                                active=1)
+        """
+        search_dictionary = dict(prep_id=prep_id,
+                                 FK_input_id=FK_input_id,
+                                 FK_owner_id=FK_owner_id,
+                                 label=label,
+                                 active=1)
         rows = self.get_annotation_points_orm(search_dictionary)
         search_result = {}
         for row in rows:
@@ -65,7 +68,7 @@ class AnnotationPointController(Controller):
             search_result[structure] = [row.x, row.y, row.z]
         return search_result
 
-    def add_annotation_points(self,animal,FK_owner_id,FK_input_id,coordinates,FK_structure_id,label):
+    def add_annotation_points(self, animal, FK_owner_id, FK_input_id, coordinates, FK_structure_id, label):
         """adding a row to the annotation points table
 
         Args:
@@ -75,13 +78,13 @@ class AnnotationPointController(Controller):
             coordinates (list): list of x,y,z coordinates
             FK_structure_id (int): Structure ID
             label (str): label name
-        """        
-        x,y,z = coordinates
-        data = AnnotationPoint(prep_id = animal, FK_owner_id = FK_owner_id, FK_input_id = FK_input_id, x=x, y=y, \
-            section=z,FK_structure_id=FK_structure_id,label=label)
+        """
+        x, y, z = coordinates
+        data = AnnotationPoint(prep_id=animal, FK_owner_id=FK_owner_id, FK_input_id=FK_input_id, x=x, y=y,
+                               section=z, FK_structure_id=FK_structure_id, label=label)
         self.add_row(data)
-    
-    def add_com(self, prep_id, abbreviation, coordinates, FK_owner_id=2 , FK_input_id = 1):
+
+    def add_com(self, prep_id, abbreviation, coordinates, FK_owner_id=2, FK_input_id=1):
         """Adding a Com Entry
 
         Args:
@@ -90,25 +93,25 @@ class AnnotationPointController(Controller):
             coordinates (list): list of x,y,z coordinates
             FK_owner_id (int, optional): Annotator ID. Defaults to 2.
             FK_input_id (int, optional): Input Type ID. Defaults to 1.
-        """        
+        """
         FK_structure_id = self.structure_abbreviation_to_id(abbreviation)
-        if self.label_data_row_exists(animal=prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
-            FK_structure_id = FK_structure_id,label = 'COM'):
-            self.delete_label_data_row(animal=prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
-                FK_structure_id = FK_structure_id,label = 'COM')
-        self.add_annotation_points(animal = prep_id,FK_owner_id = FK_owner_id,FK_input_id = FK_input_id,\
-            coordinates = coordinates,FK_structure_id = FK_structure_id,label = 'COM')
-    
-    def label_data_row_exists(self,animal, FK_owner_id, FK_input_id, FK_structure_id, label):
+        if self.label_data_row_exists(animal=prep_id, FK_owner_id=FK_owner_id, FK_input_id=FK_input_id,
+                                      FK_structure_id=FK_structure_id, label='COM'):
+            self.delete_label_data_row(animal=prep_id, FK_owner_id=FK_owner_id, FK_input_id=FK_input_id,
+                                       FK_structure_id=FK_structure_id, label='COM')
+        self.add_annotation_points(animal=prep_id, FK_owner_id=FK_owner_id, FK_input_id=FK_input_id,
+                                   coordinates=coordinates, FK_structure_id=FK_structure_id, label='COM')
+
+    def label_data_row_exists(self, animal, FK_owner_id, FK_input_id, FK_structure_id, label):
         row_exists = bool(self.session.query(AnnotationPoint).filter(
-            AnnotationPoint.prep_id == animal, 
-            AnnotationPoint.FK_owner_id == FK_owner_id, 
-            AnnotationPoint.FK_input_id == FK_input_id, 
+            AnnotationPoint.prep_id == animal,
+            AnnotationPoint.FK_owner_id == FK_owner_id,
+            AnnotationPoint.FK_input_id == FK_input_id,
             AnnotationPoint.FK_structure_id == FK_structure_id,
             AnnotationPoint.label == label).first())
         return row_exists
- 
-    def delete_label_data_row(self,animal,FK_owner_id,FK_input_id,FK_structure_id,label):
+
+    def delete_label_data_row(self, animal, FK_owner_id, FK_input_id, FK_structure_id, label):
         self.session.query(AnnotationPoint)\
             .filter(AnnotationPoint.active.is_(True))\
             .filter(AnnotationPoint.prep_id == animal)\
@@ -117,16 +120,16 @@ class AnnotationPointController(Controller):
             .filter(AnnotationPoint.FK_structure_id == FK_structure_id)\
             .filter(AnnotationPoint.label == label).delete()
         self.session.commit()
-    
-    def get_com_dict(self, prep_id, FK_input_id=1, FK_owner_id=2,active = 1):
-        return self.get_annotation_points( prep_id = prep_id, FK_input_id=FK_input_id,\
-             FK_owner_id=FK_owner_id,active = active,label = 'COM')
+
+    def get_com_dict(self, prep_id, FK_input_id=1, FK_owner_id=2, active=1):
+        return self.get_annotation_points(prep_id=prep_id, FK_input_id=FK_input_id,
+                                          FK_owner_id=FK_owner_id, active=active, label='COM')
 
     def get_atlas_centers(self):
         FK_owner_id_LAUREN = 16
         INPUT_TYPE_MANUAL = 1
-        return self.get_com_dict('Atlas',INPUT_TYPE_MANUAL,FK_owner_id_LAUREN)
-    
+        return self.get_com_dict('Atlas', INPUT_TYPE_MANUAL, FK_owner_id_LAUREN)
+
     def get_point_dataframe(self, id):
         """
         :param id: primary key from the url. Look at:
@@ -168,7 +171,7 @@ class AnnotationPointController(Controller):
                 result = pd.concat(dfs)
 
         return result
-    
+
     def get_annotated_animals(self):
         results = self.session.query(AnnotationPoint)\
             .filter(AnnotationPoint.active.is_(True))\
