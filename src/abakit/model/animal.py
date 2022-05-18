@@ -28,10 +28,4 @@ class Animal(Base, AtlasModel):
     aliases_4 = Column(String)
     aliases_5 = Column(String)
     comments = Column(String)
-
-    #histology = relationship(Histology, uselist=False, backref="animal")
     scan_runs = relationship(ScanRun, backref="animal")
-    
-
-    #def __repr__(self):
-    #    return "Animal(prep_id='%s' is a species='%s'" % (self.prep_id, self.species)

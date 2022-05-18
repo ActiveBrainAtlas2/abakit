@@ -10,10 +10,10 @@ from abakit.lib.utilities_atlas import save_mesh
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from abakit.settings import DATA_PATH
-class BrainStructureManager(Brain, VolumeUtilities):
+class BrainStructureManager(VolumeUtilities):
 
     def __init__(self, animal,atlas = ATLAS,downsample_factor = 32,check_path = True):
-        Brain.__init__(self, animal)
+        self.animal = animal
         self.origins = {}
         self.COM = {}
         self.volumes = {}

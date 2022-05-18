@@ -10,67 +10,64 @@ This code takes the contours and does the following:
 3. saving COMs in the database, saving COM and volumns in the file system
 """
 import cv2
+from django.template import Origin
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.measurements import center_of_mass
-from abakit.atlas.BrainStructureManager import BrainStructureManager
 
-class VolumeMaker(BrainStructureManager):
-    def __init__(self,animal, *args, **kwargs):
-        BrainStructureManager.__init__(self,animal = animal, *args, **kwargs)
+class VolumeMaker:
 
-    def calculate_origin_COM_and_volume(self,contour_for_structurei,structurei):
-        contour_for_structurei = self.sort_contours(contour_for_structurei)
-        section_mins = []
-        section_maxs = []
-        for _, contour_points in contour_for_structurei.items():
-            contour_points = np.array(contour_points)
-            section_mins.append(np.min(contour_points, axis=0))
-            section_maxs.append(np.max(contour_points, axis=0))
-        min_z = min([int(i) for i in contour_for_structurei.keys()])
-        min_x,min_y = np.min(section_mins, axis=0)
-        max_x,max_y = np.max(section_maxs, axis=0)
-        xspan = max_x - min_x
-        yspan = max_y - min_y
-        PADDED_SIZE = (int(yspan+5), int(xspan+5))
+    def calculate_origin_and_volume_for_one_segment(self,segmenti):
+        segment_contours = self.aligned_contours[segmenti]
+        segment_contours = self.sort_contours(segment_contours)
+        origin,section_size = self.get_origin_and_section_size(segment_contours)
         volume = []
-        for _, contour_points in contour_for_structurei.items():
-            vertices = np.array(contour_points) - np.array((min_x, min_y))
+        for _, contour_points in segment_contours.items():
+            vertices = np.array(contour_points) - origin[:2]
             contour_points = (vertices).astype(np.int32)
-            volume_slice = np.zeros(PADDED_SIZE, dtype=np.uint8)
+            volume_slice = np.zeros(section_size, dtype=np.uint8)
             volume_slice = cv2.polylines(volume_slice, [contour_points], isClosed=True, color=1, thickness=1)
             volume_slice = cv2.fillPoly(volume_slice, pts=[contour_points], color=1)
             volume.append(volume_slice)
         volume = np.array(volume).astype(np.bool8)
         volume = np.swapaxes(volume,0,2)
-        com = np.array(center_of_mass(volume))
-        self.COM[structurei] = (com+np.array((min_x,min_y,min_z)))*self.pixel_to_um
-        self.origins[structurei] = np.array((min_x,min_y,min_z))
-        self.volumes[structurei] = volume
-
-    def compute_COMs_origins_and_volumes(self):
-        for structurei in tqdm(self.structures):
-            contours_of_structurei = self.aligned_contours[structurei]
-            self.calculate_origin_COM_and_volume(contours_of_structurei,structurei)
-        
-    def show_steps(self):
-        self.plot_volume_stack()
+        self.origins[segmenti] = origin
+        self.volumes[segmenti] = volume
     
-    def sort_contours(self,contour_for_structurei):
-        sections = [int(section) for section in contour_for_structurei]
+    def get_origin_and_section_size(self,segment_contours):
+        section_mins = []
+        section_maxs = []
+        for _, contour_points in segment_contours.items():
+            contour_points = np.array(contour_points)
+            section_mins.append(np.min(contour_points, axis=0))
+            section_maxs.append(np.max(contour_points, axis=0))
+        min_z = min([int(i) for i in segment_contours.keys()])
+        min_x,min_y = np.min(section_mins, axis=0)
+        max_x,max_y = np.max(section_maxs, axis=0)
+        xspan = max_x - min_x
+        yspan = max_y - min_y
+        origin = np.array([min_x,min_y,min_z])
+        size = np.array([xspan,yspan]).astype(int)+5
+        return origin,size
+
+    def compute_origins_and_volumes_for_all_segments(self):
+        self.origins = {}
+        self.volumes = {}
+        self.segments = self.aligned_contours.keys()
+        for segmenti in tqdm(self.segments):
+            self.calculate_origin_and_volume_for_one_segment(segmenti)
+    
+    def get_COM_in_pixels(self,structurei):
+        com = np.array(center_of_mass(self.volumes[structurei]))
+        return (com+self.origins[structurei])
+    
+    def sort_contours(self,contour_for_segmenti):
+        sections = [int(section) for section in contour_for_segmenti]
         section_order = np.argsort(sections)
-        keys = np.array(list(contour_for_structurei.keys()))[section_order]
-        values = np.array(list(contour_for_structurei.values()), dtype=object)[section_order]
+        keys = np.array(list(contour_for_segmenti.keys()))[section_order]
+        values = np.array(list(contour_for_segmenti.values()), dtype=object)[section_order]
         return dict(zip(keys,values))
 
-
-if __name__ == '__main__':
-    animals = ['MD589','MD585', 'MD594']
-    for animal in animals:
-        volumemaker = VolumeMaker(animal)
-        volumemaker.load_aligned_contours()
-        volumemaker.compute_COMs_origins_and_volumes()
-        # volumemaker.show_steps()
-        volumemaker.save_coms()
-        volumemaker.save_origins()
-        volumemaker.save_volumes()
+    def set_aligned_contours(self,contours):
+        self.aligned_contours = contours
+        self.structures = list(self.aligned_contours.keys())  
