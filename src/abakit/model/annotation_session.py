@@ -22,5 +22,5 @@ class AnnotationSession(Base):
     annotation_type = Column(Enum(AnnotationType))    
     brain_region = relationship('BrainRegion', lazy=True)
     user = relationship('User', lazy=True)
-    active =  Column(Integer)
+    active =  Column(Integer,default=1)
 

@@ -151,6 +151,7 @@ class SqlController(object):
 
         return sections
 
+
     def get_distinct_section_filenames(self, animal, channel):
         """
         Very similar to the get_sections query but this will return a list of
