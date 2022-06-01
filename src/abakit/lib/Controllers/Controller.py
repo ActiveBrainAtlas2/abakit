@@ -31,8 +31,7 @@ class Controller(object):
         except Exception as e:
             print(f'No merge {e}')
             self.session.rollback()
-        finally:
-            self.session.close()
+
     
     def get_row(self,search_dictionary,model):
         """look for a specific row in the database and return the result
@@ -77,3 +76,8 @@ class Controller(object):
         for key, value in search_dictionary.items():
             query_start = eval(f'query_start.filter({model.__name__}.{key}=="{value}")')
         return query_start.all()
+    
+    def delete_row(self,search_dictionary,model):
+        row = self.get_row(search_dictionary,model)
+        self.session.delete(row)
+        self.session.commit()
