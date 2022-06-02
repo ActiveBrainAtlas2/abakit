@@ -5,7 +5,7 @@ import numpy as np
 import vtk
 import mcubes # https://github.com/pmneila/PyMCubes
 
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.registration.algorithm import umeyama
 from abakit.settings import ATLAS
 singular_structures = ['AP', '12N', 'RtTg', 'SC', 'IC']

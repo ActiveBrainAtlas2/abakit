@@ -5,7 +5,7 @@ from skimage import io
 from concurrent.futures.process import ProcessPoolExecutor
 from abakit.lib.sql_setup import CLEAN_CHANNEL_1_THUMBNAIL_WITH_MASK
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_mask import rotate_image, place_image, scaled, equalized
 from abakit.lib.utilities_process import test_dir, SCALING_FACTOR, get_cpus
 import tifffile as tiff

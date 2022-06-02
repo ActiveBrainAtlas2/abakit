@@ -5,6 +5,7 @@ It also needs for the animal, histology and scan run tables to be
 filled out for each animal to use
 """
 import sys
+from abakit.lib.Controllers.Controller import Controller
 from abakit.lib.Controllers.ElasticsController import ElasticsController
 from abakit.lib.Controllers.LayerDataController import LayerDataController
 from abakit.lib.Controllers.StructuresController import StructuresController
@@ -23,21 +24,21 @@ from datetime import datetime
 import numpy as np
 from sqlalchemy import func
 from sqlalchemy.orm.exc import NoResultFound
-
+from abakit.settings import host,schema
 
 class SqlController(ElasticsController,LayerDataController,StructuresController,TransformationController,
-        UrlController,AnimalController,ScanRunController,SectionsController,TasksController,SlideController,SlideCZIToTifController):
+    UrlController,AnimalController,ScanRunController,SectionsController,TasksController,SlideController,SlideCZIToTifController):
     """ This is the old sql_controller class.  This is a huge class and we are in the process of breaking it up into smaller
         components.  Each parent class of SqlController would correspond to one table in the database, and include all the 
         methods to interact with that table
     """
 
-    def __init__(self, animal):
+    def __init__(self, animal, host=host, schema=schema):
         """ setup the attributes for the SlidesProcessor class
             Args:
                 animal: object of animal to process
         """
-        ElasticsController.__init__(self)
+        Controller.__init__(self,host=host, schema=schema)
         if self.animal_exists(animal):
             self.animal = self.get_animal(animal)
         else:

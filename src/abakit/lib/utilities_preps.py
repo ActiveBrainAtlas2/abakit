@@ -8,7 +8,7 @@ from shutil import copyfile
 from abakit.lib.sql_setup import CREATE_CHANNEL_3_FULL_RES, \
     CREATE_CHANNEL_2_FULL_RES, CREATE_CHANNEL_3_THUMBNAILS, CREATE_CHANNEL_2_THUMBNAILS
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_process import create_downsample, test_dir, \
     get_image_size, resize_and_save_tif
 

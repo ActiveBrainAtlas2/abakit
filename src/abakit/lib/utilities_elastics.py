@@ -1,7 +1,7 @@
 import os
 
 from abakit.lib.utilities_registration import register_simple
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 
 def create_elastix(animal):
 

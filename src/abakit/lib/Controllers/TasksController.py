@@ -2,8 +2,8 @@ from abakit.lib.Controllers.Controller import Controller
 from abakit.model.task import Task,ProgressLookup
 from sqlalchemy import func
 from sqlalchemy.orm.exc import NoResultFound
-from abakit.lib.sql_setup import  pooledsession
 from abakit.model.file_log import FileLog
+from datetime import datetime
 class TasksController(Controller):
     def get_current_task(self, animal):
         step = None
@@ -68,7 +68,7 @@ class TasksController(Controller):
 
         return lookup.id
 
-def file_processed(animal, progress_id, filename):
+def file_processed(animal, progress_id, filename,pooledsession):
     """
     Args:
         animal: prep_id
@@ -89,7 +89,7 @@ def file_processed(animal, progress_id, filename):
 
     return True
 
-def set_file_completed(animal, progress_id, filename):
+def set_file_completed(animal, progress_id, filename,pooledsession):
     """
     Args:
         animal: prep_id

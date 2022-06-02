@@ -3,7 +3,7 @@ from datetime import datetime
 from tqdm import tqdm
 import re
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_bioformats import get_czi_metadata, get_fullres_series_indices
 from model.scan_run import ScanRun
 from model.slide import Slide

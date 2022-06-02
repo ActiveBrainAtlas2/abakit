@@ -10,8 +10,8 @@ class AnimalController(Controller):
 
     def animal_exists(self,animal):
         search_dictionary = dict(prep_id =animal)
-        self.row_exists(search_dictionary,Animal)
+        return self.row_exists(search_dictionary,Animal)
     
     def get_animal(self,animal):
         search_dictionary = dict(prep_id =animal)
-        self.get_row(search_dictionary,Animal)
+        return self.get_row(search_dictionary,Animal)

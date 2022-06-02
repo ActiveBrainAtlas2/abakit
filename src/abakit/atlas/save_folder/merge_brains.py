@@ -30,7 +30,7 @@ from abakit.model.layer_data import LayerData
 from abakit.lib.sql_setup import session
 from abakit.settings import DATA_PATH
 from abakit.lib.utilities_atlas import singular_structures
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_atlas import convert_vol_bbox_dict_to_overall_vol, symmetricalize_volume, \
     volume_to_polydata, save_mesh_stl
 

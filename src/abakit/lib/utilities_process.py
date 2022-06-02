@@ -13,7 +13,7 @@ from skimage.transform import rescale
 PIPELINE_ROOT = Path('.').absolute().parent
 sys.path.append(PIPELINE_ROOT.as_posix())
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.sql_setup import QC_IS_DONE_ON_SLIDES_IN_WEB_ADMIN, CZI_FILES_ARE_CONVERTED_INTO_NUMBERED_TIFS_FOR_CHANNEL_1
 
 SCALING_FACTOR = 0.03125

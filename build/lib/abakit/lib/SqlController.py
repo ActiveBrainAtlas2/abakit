@@ -31,9 +31,6 @@ from sqlalchemy.orm import sessionmaker
 
 from abakit.settings import user,password,host,schema
 
-
-
-
 class SqlController(object):
     """ Create a class for processing the pipeline,
     """
@@ -44,7 +41,7 @@ class SqlController(object):
                 animal: object of animal to process
         """
         
-        self.session = self.get_session(host, schema)
+        self.session,self.pooledsession = self.get_session(host, schema)
         try:
             self.animal = self.session.query(Animal).filter(
                 Animal.prep_id == animal).one()
@@ -72,7 +69,9 @@ class SqlController(object):
         engine = create_engine(connection_string, echo=False)
         Session = sessionmaker(bind=engine)
         session = Session()
-        return session
+        pooledengine = create_engine(connection_string, pool_size=10, max_overflow=50, pool_recycle=3600)
+        pooledsession = scoped_session(sessionmaker(bind=pooledengine)) 
+        return session,pooledsession
     
     def animal_exists(self,animal):
         return bool(self.session.query(Animal).filter(Animal.prep_id == animal).first())
@@ -592,6 +591,8 @@ class SqlController(object):
     def set_task_for_step(self,animal,downsample,channel,step):
         progress_id = self.get_progress_id(downsample, channel, step)
         self.set_task(animal, progress_id)
+    
+        
 
 def file_processed(animal, progress_id, filename):
     """

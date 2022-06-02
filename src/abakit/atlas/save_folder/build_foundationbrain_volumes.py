@@ -19,7 +19,7 @@ PATH = os.path.join(HOME, 'programming/pipeline_utility/src')
 sys.path.append(PATH)
 from abakit.settings import DATA_PATH
 from abakit.settings import ATLAS
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 
 DOWNSAMPLE_FACTOR = 32
 

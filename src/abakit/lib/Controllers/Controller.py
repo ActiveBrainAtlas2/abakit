@@ -1,11 +1,23 @@
 from abakit.lib.sql_setup import session, pooledsession
-
+from abakit.settings import user,password,host,schema
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 class Controller(object):
-    def __init__(self):
+    def __init__(self, host=host, schema=schema):
         """ setup a sqalchemy session
         """
-        self.session = session
-    
+        self.session,self.pooledsession = self.get_session(host, schema)
+
+    def get_session(self, host, schema):
+        connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
+        engine = create_engine(connection_string, echo=False)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        pooledengine = create_engine(connection_string, pool_size=10, max_overflow=50, pool_recycle=3600)
+        pooledsession = scoped_session(sessionmaker(bind=pooledengine)) 
+        return session,pooledsession
+
     def update_row(self, row):
         """update one row of a database
 
@@ -59,7 +71,7 @@ class Controller(object):
         Returns:
             boolearn: whether the row exists
         """
-        return self.get_row(search_dictionary,model) == True
+        return self.get_row(search_dictionary,model) is not None
     
     def query_table(self,search_dictionary,model):
         """query a sql table and return all the results fitting the search criterias

@@ -21,7 +21,7 @@ PIPELINE_ROOT = Path('./src').absolute()
 sys.path.append(PIPELINE_ROOT.as_posix())
 
 
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 
 RESOLUTION = 0.325
 

@@ -3,7 +3,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_process import test_dir
 
 

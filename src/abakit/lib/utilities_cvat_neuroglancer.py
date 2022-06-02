@@ -14,7 +14,7 @@ from matplotlib import colors
 from pylab import cm
 from collections import defaultdict
 
-from abakit.lib.SqlController import SqlController, file_processed, set_file_completed
+from abakit.lib.Controllers.SqlController import SqlController, file_processed, set_file_completed
 from abakit.lib.utilities_process import get_cpus
 
 def calculate_chunks(downsample, mip):

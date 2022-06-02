@@ -4,7 +4,7 @@ from concurrent.futures.process import ProcessPoolExecutor
 from skimage import io
 from abakit.lib.FileLocationManager import FileLocationManager
 from abakit.lib.utilities_cvat_neuroglancer import NumpyToNeuroglancer, calculate_chunks
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.sql_setup import RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_2_FULL_RES, RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_3_FULL_RES
 from abakit.lib.utilities_process import get_cpus, SCALING_FACTOR, test_dir
 

@@ -8,7 +8,7 @@ from concurrent.futures.process import ProcessPoolExecutor
 
 from abakit.lib.FileLocationManager import FileLocationManager
 from abakit.lib.logger import get_logger
-from abakit.lib.sqlcontroller import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_process import test_dir, get_cpus
 
 COLORS = {1: 'b', 2: 'r', 3: 'g'}
