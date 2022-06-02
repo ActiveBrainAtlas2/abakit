@@ -23,20 +23,28 @@ import pandas as pd
 from collections import OrderedDict
 from datetime import datetime
 import numpy as np
-from sqlalchemy import func
+from sqlalchemy import func, create_engine
 from sqlalchemy.orm.exc import NoResultFound
+
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
+
+from abakit.settings import user,password,host,schema
+
+
 
 
 class SqlController(object):
     """ Create a class for processing the pipeline,
     """
 
-    def __init__(self, animal):
+    def __init__(self, animal, host=host, schema=schema):
         """ setup the attributes for the SlidesProcessor class
             Args:
                 animal: object of animal to process
         """
-        self.session = session
+        
+        self.session = self.get_session(host, schema)
         try:
             self.animal = self.session.query(Animal).filter(
                 Animal.prep_id == animal).one()
@@ -58,6 +66,13 @@ class SqlController(object):
         self.valid_sections = OrderedDict()
         # fill up the metadata_cache variable
         # self.session.close()
+
+    def get_session(self, host, schema):
+        connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
+        engine = create_engine(connection_string, echo=False)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return session
     
     def animal_exists(self,animal):
         return bool(self.session.query(Animal).filter(Animal.prep_id == animal).first())
