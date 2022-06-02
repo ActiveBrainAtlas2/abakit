@@ -5,6 +5,10 @@ from abakit.model.slide import Slide
 from sqlalchemy import func
 
 class ScanRunController(Controller):
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
         
     def scan_run_exists(self,animal):
         return self.row_exists(dict(prep_id = animal),ScanRun)

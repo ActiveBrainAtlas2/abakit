@@ -1,6 +1,11 @@
 from abakit.lib.Controllers.Controller import Controller
 from abakit.model.animal import Animal
 class AnimalController(Controller):
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
+        
     def get_animal_list(self):
         results = self.session.query(Animal).all()
         animals = []

@@ -2,6 +2,12 @@ from abakit.lib.Controllers.Controller import Controller
 from abakit.model.slide_czi_to_tif import SlideCziTif
 from abakit.model.slide import Slide
 class SlideCZIToTifController(Controller):
+
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
+
     def get_tif(self, ID):
         """
         Args:

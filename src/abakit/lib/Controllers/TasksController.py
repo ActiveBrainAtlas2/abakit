@@ -5,6 +5,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from abakit.model.file_log import FileLog
 from datetime import datetime
 class TasksController(Controller):
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
+        
     def get_current_task(self, animal):
         step = None
         try:

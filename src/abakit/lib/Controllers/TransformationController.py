@@ -4,8 +4,10 @@ from abakit.model.transformation_type import TransformationType
 import pickle
 class TransformationController(Controller):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
     
     def add_transformation_row(self,source,destination,transformation_type,transformation):
         """adding a row to the transformation table

@@ -5,8 +5,10 @@ from sqlalchemy.orm.exc import NoResultFound
 
 class StructuresController(Controller):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
 
     def get_structure_color(self, abbrv):
         """
