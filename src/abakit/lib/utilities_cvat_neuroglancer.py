@@ -296,7 +296,7 @@ class NumpyToNeuroglancer():
         del img
         return
 
-    def process_image(self, file_key):
+    def process_image(self, file_key,orientation = 'sagittal'):
         index, infile = file_key
         basefile = os.path.basename(infile)
         completed = file_processed(self.animal, self.progress_id, basefile)
@@ -314,7 +314,12 @@ class NumpyToNeuroglancer():
             print(f'could not reshape {infile}')
             return
         try:
-            self.precomputed_vol[:, :, index] = img
+            if orientation == 'sagittal':
+                self.precomputed_vol[:, :, index] = img
+            elif orientation == 'coronal':
+                self.precomputed_vol[index, :, :] = img 
+            elif orientation == 'horizontal':
+                self.precomputed_vol[:, index, :] = img
         except:
             print(f'could not set {infile} to precomputed')
             return
