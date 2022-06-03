@@ -1,5 +1,5 @@
 from abakit.lib.Controllers.Controller import Controller
-from abakit.model.slide_czi_to_tif import SlideCziTif
+from abakit.model.slide import SlideCziTif
 from abakit.model.slide import Slide
 class SlideCZIToTifController(Controller):
 

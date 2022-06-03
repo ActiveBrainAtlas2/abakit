@@ -1,11 +1,23 @@
 from sqlalchemy import Column, String, Integer, Boolean, Float, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from .atlas_model import Base, AtlasModel
+from abakit.model.atlas_model import Base, AtlasModel
 
+class SlideCziTif(Base, AtlasModel):
+    __tablename__ = 'slide_czi_to_tif'
+    id =  Column(Integer, primary_key=True, nullable=False)
+    slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
+    file_name = Column(String, nullable=False)
+    scene_number = Column(Integer, nullable=False)
+    width = Column(Integer)
+    height = Column(Integer)
+    file_size = Column(Float)
+    comments = Column(String)
+    channel = Column(Integer)
+    scene_index = Column(Integer)
+    processing_duration = Column(Float, nullable=False)
 
 class Slide(Base, AtlasModel):
     __tablename__ = 'slide'
-
     id =  Column(Integer, primary_key=True, nullable=False)
     scan_run_id = Column(Integer, ForeignKey('scan_run.id'))
     slide_physical_id = Column(Integer)
@@ -28,11 +40,27 @@ class Slide(Base, AtlasModel):
     file_size = Column(Float, nullable=False)
     file_name = Column(String, nullable=False)
     comments = Column(String)
-    scene_rotation_1 =  Column(Integer, default=0)
-    scene_rotation_2 =  Column(Integer, default=0)
-    scene_rotation_3 =  Column(Integer, default=0)
-    scene_rotation_4 =  Column(Integer, default=0)
-    scene_rotation_5 =  Column(Integer, default=0)
-    scene_rotation_6 =  Column(Integer, default=0)
+    scene_rotation_1 = Column(Integer, default=0)
+    scene_rotation_2 = Column(Integer, default=0)
+    scene_rotation_3 = Column(Integer, default=0)
+    scene_rotation_4 = Column(Integer, default=0)
+    scene_rotation_5 = Column(Integer, default=0)
+    scene_rotation_6 = Column(Integer, default=0)
+    
 
-    slide_czi_tifs = relationship('SlideCziTif', lazy=True)
+class Section(Base, AtlasModel):
+    __tablename__ = 'sections'
+    id =  Column(Integer, primary_key=True, nullable=False)
+    prep_id = Column(String, ForeignKey('animal.prep_id'), nullable=False)
+    czi_file = Column(String, nullable=False)
+    slide_physical_id = Column(Integer, nullable=False)
+    file_name = Column(String, nullable=False)
+    tif_id = Column(Integer, ForeignKey('slide_czi_to_tif.id'), nullable=False)
+    scene_number = Column(Integer, nullable=False)
+    scene_index = Column(Integer, nullable=False)
+    channel = Column(Integer, nullable=False)
+    channel_index = Column(Integer, nullable=False)
+    slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
+    def get_rotation(self):
+        return getattr(self.slide,f'scene_rotation_{self.scene_number}')
+

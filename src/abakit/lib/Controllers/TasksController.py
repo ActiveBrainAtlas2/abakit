@@ -76,6 +76,11 @@ class TasksController(Controller):
     def set_task_for_step(self,animal,downsample,channel,step):
         progress_id = self.get_progress_id(downsample, channel, step)
         self.set_task(animal, progress_id)
+    
+    def get_available_actions(self):
+        results = self.session.query(ProgressLookup).filter(ProgressLookup.active==1).all()
+        for resulti in results:
+            print(f'action: {resulti.action}, channel: {resulti.channel}, downsample: {resulti.downsample}')
 
 def file_processed(animal, progress_id, filename,pooledsession):
     """

@@ -5,15 +5,14 @@ It also needs for the animal, histology and scan run tables to be
 filled out for each animal to use
 """
 import sys
-from abakit.lib.sql_setup import session, pooledsession
 from abakit.model.file_log import FileLog
 from abakit.model.urlModel import UrlModel
 from abakit.model.task import Task, ProgressLookup
 from abakit.model.annotation_points import AnnotationPoint
 from abakit.model.brain_region import BrainRegion
-from abakit.model.slide_czi_to_tif import SlideCziTif
+from abakit.model.slide import SlideCziTif
 from abakit.model.slide import Slide
-from abakit.model.section import Section
+from abakit.model.slide import Section
 from abakit.model.scan_run import ScanRun
 from abakit.model.histology import Histology
 from abakit.model.animal import Animal

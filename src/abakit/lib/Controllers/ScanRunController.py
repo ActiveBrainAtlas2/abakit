@@ -1,6 +1,6 @@
 from abakit.lib.Controllers.Controller import Controller
 from abakit.model.scan_run import ScanRun
-from abakit.model.slide_czi_to_tif import SlideCziTif
+from abakit.model.slide import SlideCziTif
 from abakit.model.slide import Slide
 from sqlalchemy import func
 

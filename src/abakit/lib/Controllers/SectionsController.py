@@ -1,5 +1,5 @@
 from abakit.lib.Controllers.Controller import Controller
-from abakit.model.section import Section
+from abakit.model.slide import Section
 class SectionsController(Controller):
     def __init__(self,*args,**kwargs):
         """initiates the controller class

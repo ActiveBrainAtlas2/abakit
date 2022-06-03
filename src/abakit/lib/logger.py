@@ -1,8 +1,5 @@
 import logging
-
-from abakit.lib.sql_setup import session
 from abakit.model.log import Log
-
 
 class DatabaseHandler(logging.Handler):
     def emit(self, record):
@@ -12,8 +9,8 @@ class DatabaseHandler(logging.Handler):
             logger=record.module,
             msg=record.msg,
         )
-        session.add(log)
-        session.commit()
+        self.session.add(log)
+        self.session.commit()
 
 
 def get_logger(prep_id, level=logging.INFO):

@@ -5,7 +5,6 @@ from skimage import io
 from abakit.lib.FileLocationManager import FileLocationManager
 from abakit.lib.utilities_cvat_neuroglancer import NumpyToNeuroglancer, calculate_chunks
 from abakit.lib.Controllers.SqlController import SqlController
-from abakit.lib.sql_setup import RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_2_FULL_RES, RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_3_FULL_RES
 from abakit.lib.utilities_process import get_cpus, SCALING_FACTOR, test_dir
 
 def get_scales(animal,downsample):
@@ -49,8 +48,10 @@ def create_neuroglancer(animal, channel, downsample, debug=False):
         sqlController.set_task(animal, progress_id)
         if sqlController.histology.counterstain != None:
             if 'thion' in sqlController.histology.counterstain:
-                sqlController.set_task(animal, RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_2_FULL_RES)
-                sqlController.set_task(animal, RUN_PRECOMPUTE_NEUROGLANCER_CHANNEL_3_FULL_RES)
+                id = sqlController.get_progress_id(downsample=0,channel=2,action='NEUROGLANCER')
+                sqlController.set_task(animal, id)
+                id = sqlController.get_progress_id(downsample=0,channel=3,action='NEUROGLANCER')
+                sqlController.set_task(animal, id)
     OUTPUT_DIR = os.path.join(fileLocationManager.neuroglancer_data, f'{channel_outdir}')
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     error = test_dir(animal, INPUT, downsample, same_size=True)
