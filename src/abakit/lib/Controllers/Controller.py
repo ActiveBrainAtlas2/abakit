@@ -1,4 +1,3 @@
-from abakit.lib.sql_setup import session, pooledsession
 from abakit.settings import user,password,host,schema
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
