@@ -28,19 +28,28 @@ class SectionsController(Controller):
         Returns: list of sections in order
 
         """
-        orderby = self.histology.side_sectioned_first
-
-        if orderby == 'DESC':
+        slide_orderby = self.histology.side_sectioned_first
+        scene_order_by = self.histology.scene_order
+        if slide_orderby == 'DESC' and scene_order_by == 'DESC':
             sections = self.session.query(Section).filter(Section.prep_id == animal)\
                 .filter(Section.channel == channel)\
                 .order_by(Section.slide_physical_id.desc())\
                 .order_by(Section.scene_number.desc()).all()
-        else:
+        elif slide_orderby == 'ASC' and scene_order_by == 'ASC':
             sections = self.session.query(Section).filter(Section.prep_id == animal)\
                 .filter(Section.channel == channel)\
                 .order_by(Section.slide_physical_id.asc())\
                 .order_by(Section.scene_number.asc()).all()
-
+        elif slide_orderby == 'ASC' and scene_order_by == 'DESC':
+            sections = self.session.query(Section).filter(Section.prep_id == animal)\
+                .filter(Section.channel == channel)\
+                .order_by(Section.slide_physical_id.asc())\
+                .order_by(Section.scene_number.desc()).all()
+        elif slide_orderby == 'DESC' and scene_order_by == 'ASC':
+            sections = self.session.query(Section).filter(Section.prep_id == animal)\
+                .filter(Section.channel == channel)\
+                .order_by(Section.slide_physical_id.desc())\
+                .order_by(Section.scene_number.asc()).all()
         return sections
     
     def get_sections_numbers(self, animal):

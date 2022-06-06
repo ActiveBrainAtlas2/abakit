@@ -15,7 +15,7 @@ from abakit.lib.Controllers.ScanRunController import ScanRunController
 from abakit.lib.Controllers.SectionsController import SectionsController
 from abakit.lib.Controllers.SlideController import SlideController
 from abakit.lib.Controllers.SlideCZIToTifController import SlideCZIToTifController
-from abakit.lib.Controllers.TasksController import TasksController
+from abakit.lib.Controllers.TasksController import TasksController,file_processed, set_file_completed
 from abakit.model.scan_run import ScanRun
 from abakit.model.histology import Histology
 from collections import OrderedDict
