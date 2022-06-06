@@ -9,9 +9,10 @@ class AnnotationPointController(Controller):
     """This class is about to be depricated as the annotation points table are to be split into the PolygonSequence,
        StructureCom and MarkedCells table
     """
-
-    def __init__(self):
-        super().__init__()
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
 
     def get_annotation_points_orm(self, search_dictionary):
         """The main function for querying the annoataion points table

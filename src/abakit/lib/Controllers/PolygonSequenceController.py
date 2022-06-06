@@ -5,6 +5,11 @@ from abakit.lib.Controllers.Controller import Controller
 
 class PolygonSequenceController(Controller):
     '''The class that queries and addes entry to the PolygonSequence table'''
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
+        
     def get_available_volumes(self):
         active_sessions = self.get_available_volumes_sessions()
         information = [[i.FK_prep_id,i.user.first_name,i.brain_region.abbreviation] for i in active_sessions]

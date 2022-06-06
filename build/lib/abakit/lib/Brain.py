@@ -1,4 +1,4 @@
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.FileLocationManager import FileLocationManager
 from abakit.Plotter.Plotter import Plotter
 import numpy as np

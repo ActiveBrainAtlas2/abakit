@@ -12,7 +12,7 @@ from abakit.lib.utilities_mask import  place_image
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_alignment import (create_downsampled_transforms, process_image)
 from abakit.lib.utilities_process import test_dir, get_cpus
 from abakit.model.elastix_transformation import ElastixTransformation

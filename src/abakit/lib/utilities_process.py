@@ -13,8 +13,7 @@ from skimage.transform import rescale
 PIPELINE_ROOT = Path('.').absolute().parent
 sys.path.append(PIPELINE_ROOT.as_posix())
 from abakit.lib.FileLocationManager import FileLocationManager
-from abakit.lib.SqlController import SqlController
-from abakit.lib.sql_setup import QC_IS_DONE_ON_SLIDES_IN_WEB_ADMIN, CZI_FILES_ARE_CONVERTED_INTO_NUMBERED_TIFS_FOR_CHANNEL_1
+from abakit.lib.Controllers.SqlController import SqlController
 
 SCALING_FACTOR = 0.03125
 Image.MAX_IMAGE_PIXELS = None
@@ -160,6 +159,8 @@ def make_tifs(animal, channel,workers = 10):
     OUTPUT = fileLocationManager.tif
     os.makedirs(OUTPUT, exist_ok=True)
     sections = sqlController.get_distinct_section_filenames(animal, channel)
+    QC_IS_DONE_ON_SLIDES_IN_WEB_ADMIN = sqlController.get_progress_id(downsample=1,channel=0,action='QC')
+    CZI_FILES_ARE_CONVERTED_INTO_NUMBERED_TIFS_FOR_CHANNEL_1 = sqlController.get_progress_id(downsample=0,channel=1,action='TIF')
     sqlController.set_task(animal, QC_IS_DONE_ON_SLIDES_IN_WEB_ADMIN)
     sqlController.set_task(animal, CZI_FILES_ARE_CONVERTED_INTO_NUMBERED_TIFS_FOR_CHANNEL_1)
 

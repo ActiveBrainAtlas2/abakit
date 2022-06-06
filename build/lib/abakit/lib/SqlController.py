@@ -23,20 +23,25 @@ import pandas as pd
 from collections import OrderedDict
 from datetime import datetime
 import numpy as np
-from sqlalchemy import func
+from sqlalchemy import func, create_engine
 from sqlalchemy.orm.exc import NoResultFound
 
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
+
+from abakit.settings import user,password,host,schema
 
 class SqlController(object):
     """ Create a class for processing the pipeline,
     """
 
-    def __init__(self, animal):
+    def __init__(self, animal, host=host, schema=schema):
         """ setup the attributes for the SlidesProcessor class
             Args:
                 animal: object of animal to process
         """
-        self.session = session
+        
+        self.session,self.pooledsession = self.get_session(host, schema)
         try:
             self.animal = self.session.query(Animal).filter(
                 Animal.prep_id == animal).one()
@@ -58,6 +63,15 @@ class SqlController(object):
         self.valid_sections = OrderedDict()
         # fill up the metadata_cache variable
         # self.session.close()
+
+    def get_session(self, host, schema):
+        connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
+        engine = create_engine(connection_string, echo=False)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        pooledengine = create_engine(connection_string, pool_size=10, max_overflow=50, pool_recycle=3600)
+        pooledsession = scoped_session(sessionmaker(bind=pooledengine)) 
+        return session,pooledsession
     
     def animal_exists(self,animal):
         return bool(self.session.query(Animal).filter(Animal.prep_id == animal).first())
@@ -150,6 +164,7 @@ class SqlController(object):
                 .order_by(Section.scene_number.asc()).all()
 
         return sections
+
 
     def get_distinct_section_filenames(self, animal, channel):
         """
@@ -576,6 +591,8 @@ class SqlController(object):
     def set_task_for_step(self,animal,downsample,channel,step):
         progress_id = self.get_progress_id(downsample, channel, step)
         self.set_task(animal, progress_id)
+    
+        
 
 def file_processed(animal, progress_id, filename):
     """

@@ -6,7 +6,7 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 import pickle
 import re
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.FileLocationManager import FileLocationManager
 import tifffile as tiff
 from scipy.ndimage import affine_transform

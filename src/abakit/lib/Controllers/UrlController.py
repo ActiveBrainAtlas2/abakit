@@ -4,6 +4,11 @@ class UrlController(Controller):
     """The sqlalchemy controller to query the neuroglancer url table
     """    
 
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
+
     def url_exists(self,comments):
         """checking if a url entry exists
 

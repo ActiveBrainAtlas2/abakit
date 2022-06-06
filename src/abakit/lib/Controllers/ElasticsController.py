@@ -8,10 +8,10 @@ class ElasticsController(Controller):
     Args:
         Controller (Class): Parent class of sqalchemy session
     """
-    def __init__(self):
+    def __init__(self,*args,**kwargs):
         """initiates the controller class
         """        
-        super().__init__()
+        Controller.__init__(self,*args,**kwargs)
 
     def check_elastix_row(self, animal, section):
         """checks that a given elastix row exists in the database

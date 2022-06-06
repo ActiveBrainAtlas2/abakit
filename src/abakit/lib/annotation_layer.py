@@ -49,6 +49,10 @@ class AnnotationLayer:
                 annotations.append(self.parse_volume(annotationi))
             elif annotationi['type'] == 'point':
                 annotations.append(self.parse_point(annotationi))
+            elif annotationi['type'] == 'cell':
+                annotations.append(self.parse_point(annotationi))
+            elif annotationi['type'] == 'com':
+                annotations.append(self.parse_point(annotationi))
             elif annotationi['type'] == 'line':
                 annotations.append(self.parse_line(annotationi))
         self.annotations = np.array(annotations)
@@ -57,14 +61,16 @@ class AnnotationLayer:
         # self.check_polygon_points()
         self.group_annotations('volume')
     
-    def parse_point(self, point_json):
+    def parse_point(self, point_json,point_class ='Point'):
         '''
         Parse the neuroglancer json of a point annotation
         :param point_json: dictionary of neuroglancer point annotation json state
         '''
-        point = Point(point_json['point'], point_json['id'])
+        point = eval(f'{point_class}(point_json["point"], point_json["id"])')
         if 'description' in point_json:
             point.description = point_json['description']
+        if 'category' in point_json:
+            point.category = point_json['category']
         return point
     
     def parse_line(self, line_json):
@@ -234,6 +240,12 @@ class Annotation:
             return self.description
         else:
             return None
+    def is_com(self):
+        return self._type == 'com'
+
+    def is_cell(self):
+        return self._type == 'cell'
+
 
 class Point(Annotation):
     '''
@@ -257,6 +269,15 @@ class Point(Annotation):
         point_json = {}
         ...
 
+class COM(Point):
+    def __init__(self, coord, id):
+        super().__init__(coord,id)
+        self._type = 'com'
+
+class Cell(Point):
+    def __init__(self, coord, id):
+        super().__init__(coord,id)
+        self._type = 'cell'
 
 class Line(Annotation):
     '''

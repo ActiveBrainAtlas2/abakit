@@ -1,11 +1,14 @@
 from abakit.model.structure import Structure
 from sqlalchemy import func
 from abakit.lib.Controllers.Controller import Controller
+from sqlalchemy.orm.exc import NoResultFound
 
 class StructuresController(Controller):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,*args,**kwargs):
+        """initiates the controller class
+        """        
+        Controller.__init__(self,*args,**kwargs)
 
     def get_structure_color(self, abbrv):
         """
@@ -79,3 +82,12 @@ class StructuresController(Controller):
         :return: structure object
         """
         return self.session.query(Structure).filter(Structure.abbreviation == func.binary(abbrv)).one()
+    
+        
+    def structure_abbreviation_to_id(self,abbreviation):
+        try:
+            structure = self.get_structure(str(abbreviation).strip())
+        except NoResultFound as nrf:
+            print(f'No structure found for {abbreviation} {nrf}')
+            return
+        return structure.id

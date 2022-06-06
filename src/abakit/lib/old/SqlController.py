@@ -5,15 +5,14 @@ It also needs for the animal, histology and scan run tables to be
 filled out for each animal to use
 """
 import sys
-from abakit.lib.sql_setup import session, pooledsession
 from abakit.model.file_log import FileLog
 from abakit.model.urlModel import UrlModel
 from abakit.model.task import Task, ProgressLookup
 from abakit.model.annotation_points import AnnotationPoint
 from abakit.model.brain_region import BrainRegion
-from abakit.model.slide_czi_to_tif import SlideCziTif
+from abakit.model.slide import SlideCziTif
 from abakit.model.slide import Slide
-from abakit.model.section import Section
+from abakit.model.slide import Section
 from abakit.model.scan_run import ScanRun
 from abakit.model.histology import Histology
 from abakit.model.animal import Animal
@@ -23,20 +22,25 @@ import pandas as pd
 from collections import OrderedDict
 from datetime import datetime
 import numpy as np
-from sqlalchemy import func
+from sqlalchemy import func, create_engine
 from sqlalchemy.orm.exc import NoResultFound
 
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
+
+from abakit.settings import user,password,host,schema
 
 class SqlController(object):
     """ Create a class for processing the pipeline,
     """
 
-    def __init__(self, animal):
+    def __init__(self, animal, host=host, schema=schema):
         """ setup the attributes for the SlidesProcessor class
             Args:
                 animal: object of animal to process
         """
-        self.session = session
+        
+        self.session,self.pooledsession = self.get_session(host, schema)
         try:
             self.animal = self.session.query(Animal).filter(
                 Animal.prep_id == animal).one()
@@ -58,6 +62,15 @@ class SqlController(object):
         self.valid_sections = OrderedDict()
         # fill up the metadata_cache variable
         # self.session.close()
+
+    def get_session(self, host, schema):
+        connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
+        engine = create_engine(connection_string, echo=False)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        pooledengine = create_engine(connection_string, pool_size=10, max_overflow=50, pool_recycle=3600)
+        pooledsession = scoped_session(sessionmaker(bind=pooledengine)) 
+        return session,pooledsession
     
     def animal_exists(self,animal):
         return bool(self.session.query(Animal).filter(Animal.prep_id == animal).first())
@@ -150,6 +163,7 @@ class SqlController(object):
                 .order_by(Section.scene_number.asc()).all()
 
         return sections
+
 
     def get_distinct_section_filenames(self, animal, channel):
         """
@@ -576,6 +590,8 @@ class SqlController(object):
     def set_task_for_step(self,animal,downsample,channel,step):
         progress_id = self.get_progress_id(downsample, channel, step)
         self.set_task(animal, progress_id)
+    
+        
 
 def file_processed(animal, progress_id, filename):
     """

@@ -22,6 +22,7 @@ class Histology(Base, AtlasModel):
     block = Column(String)
     date_sectioned = Column(Date)
     side_sectioned_first = Column(Enum("ASC", "DESC"))
+    scene_order = Column(Enum("ASC", "DESC"))
     sectioning_method = Column(Enum("cryoJane", "cryostat", "vibratome", "optical", "sliding microtiome"))
     section_thickness = Column(Integer, default=20, nullable=False)
     orientation = Column(Enum("coronal", "horizontal", "sagittal", "oblique"))

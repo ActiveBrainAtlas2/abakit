@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 class VolumeToContour:
 
     def volume_to_contours(self,volume):

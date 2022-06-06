@@ -10,7 +10,7 @@ import numpy as np
 from collections import defaultdict
 from abakit.registration.algorithm import brain_to_atlas_transform,umeyama
 from abakit.lib.utilities_atlas import singular_structures
-from abakit.lib.SqlController import SqlController
+from abakit.lib.Controllers.SqlController import SqlController
 from abakit.lib.utilities_atlas import  symmetricalize_volume, find_merged_bounding_box,crop_and_pad_volumes
 from abakit.atlas.Atlas import Atlas,BrainStructureManager
 from Registration.StackRegistration.RigidRegistration import RigidRegistration

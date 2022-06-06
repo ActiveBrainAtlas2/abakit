@@ -39,7 +39,7 @@ class MarkedCell(Base):
     z = Column(Float, nullable=False)
     source = Column(Enum(CellSources))    
     FK_session_id = Column(Integer, ForeignKey('annotation_session.id'), nullable=True)
-    FK_cell_type_id = Column(Integer, ForeignKey('cell_type.id'), nullable=True)
+    FK_cell_type_id = Column(Integer)
     session = relationship('AnnotationSession', lazy=True)
 
 class COMSources(enum.Enum):
