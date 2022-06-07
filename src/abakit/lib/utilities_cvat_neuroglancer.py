@@ -296,10 +296,10 @@ class NumpyToNeuroglancer():
         del img
         return
 
-    def process_image(self, file_key,orientation = 'sagittal'):
-        index, infile = file_key
+    def process_image(self, file_key):
+        index, infile,session,orientation = file_key
         basefile = os.path.basename(infile)
-        completed = file_processed(self.animal, self.progress_id, basefile)
+        completed = file_processed(self.animal, self.progress_id, basefile,session)
         if completed:
             print(f"Section {index} already processed, skipping ")
             return
@@ -323,7 +323,7 @@ class NumpyToNeuroglancer():
         except:
             print(f'could not set {infile} to precomputed')
             return
-        set_file_completed(self.animal, self.progress_id, basefile)
+        set_file_completed(self.animal, self.progress_id, basefile,session)
         del img
         return
 
