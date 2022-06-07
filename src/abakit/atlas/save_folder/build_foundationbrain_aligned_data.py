@@ -19,7 +19,7 @@ import pandas as pd
 import ast
 import json
 from tqdm import tqdm
-from abakit.utilities.shell_tools import get_image_size
+from abakit.lib.utilities_process import get_image_size
 from scipy.interpolate import splprep, splev
 
 HOME = os.path.expanduser("~")

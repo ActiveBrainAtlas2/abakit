@@ -1,5 +1,4 @@
 import SimpleITK as sitk
-from SimpleITK.SimpleITK import Transform
 import numpy as np
 from copy import copy
 class Transformation:

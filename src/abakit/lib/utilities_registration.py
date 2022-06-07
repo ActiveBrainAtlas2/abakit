@@ -60,25 +60,6 @@ def create_matrix(final_transform):
     T = np.vstack([np.column_stack([R, shift]), [0, 0, 1]])
     return T
 
-
-def create_warp_transforms(animal, transforms, transforms_resol, resolution):
-    # transforms_resol = op['resolution']
-    transforms_scale_factor = convert_resolution_string_to_um(
-        animal, resolution=transforms_resol
-    ) / convert_resolution_string_to_um(animal, resolution=resolution)
-    tf_mat_mult_factor = np.array(
-        [[1, 1, transforms_scale_factor], [1, 1, transforms_scale_factor]]
-    )
-    transforms_to_anchor = {
-        img_name: convert_2d_transform_forms(
-            np.reshape(tf, (3, 3))[:2] * tf_mat_mult_factor
-        )
-        for img_name, tf in transforms.items()
-    }
-
-    return transforms_to_anchor
-
-
 def convert_2d_transform_forms(arr):
     """
     Just creates correct size matrix

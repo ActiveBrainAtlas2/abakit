@@ -163,7 +163,7 @@ class AnnotationLayer:
         :param id: UUID string assigned by neuroglancer
         '''
         search_result = self.search_annotation_with_id(id)
-        if len(search_result) == 0:
+        if sum(search_result) == 0:
             return None
         else:
             return self.annotations[search_result][0]
