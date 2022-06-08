@@ -50,9 +50,9 @@ class AnnotationLayer:
             elif annotationi['type'] == 'point':
                 annotations.append(self.parse_point(annotationi))
             elif annotationi['type'] == 'cell':
-                annotations.append(self.parse_point(annotationi))
+                annotations.append(self.parse_point(annotationi,point_class='Cell'))
             elif annotationi['type'] == 'com':
-                annotations.append(self.parse_point(annotationi))
+                annotations.append(self.parse_point(annotationi,point_class='COM'))
             elif annotationi['type'] == 'line':
                 annotations.append(self.parse_line(annotationi))
         self.annotations = np.array(annotations)
