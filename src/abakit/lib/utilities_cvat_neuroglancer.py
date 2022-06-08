@@ -13,9 +13,10 @@ from cloudvolume.lib import touch
 from matplotlib import colors
 from pylab import cm
 from collections import defaultdict
-
+import pickle
 from abakit.lib.Controllers.SqlController import SqlController, file_processed, set_file_completed
 from abakit.lib.utilities_process import get_cpus
+from abakit.lib.Controllers.Controller import create_pooled_session
 
 def calculate_chunks(downsample, mip):
     """
@@ -297,7 +298,8 @@ class NumpyToNeuroglancer():
         return
 
     def process_image(self, file_key):
-        index, infile,session,orientation = file_key
+        index, infile,host,schema,orientation = file_key
+        session = create_pooled_session(host,schema)
         basefile = os.path.basename(infile)
         completed = file_processed(self.animal, self.progress_id, basefile,session)
         if completed:
@@ -314,12 +316,13 @@ class NumpyToNeuroglancer():
             print(f'could not reshape {infile}')
             return
         try:
-            if orientation == 'sagittal':
-                self.precomputed_vol[:, :, index] = img
-            elif orientation == 'coronal':
-                self.precomputed_vol[index, :, :] = img 
-            elif orientation == 'horizontal':
-                self.precomputed_vol[:, index, :] = img
+            self.precomputed_vol[:, :, index] = img
+            # if orientation == 'sagittal':
+            #     self.precomputed_vol[:, :, index] = img
+            # elif orientation == 'coronal':
+            #     self.precomputed_vol[index, :, :] = img 
+            # elif orientation == 'horizontal':
+            #     self.precomputed_vol[:, index, :] = img
         except:
             print(f'could not set {infile} to precomputed')
             return

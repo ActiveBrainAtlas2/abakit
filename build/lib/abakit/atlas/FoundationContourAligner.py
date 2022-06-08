@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import ast
 from tqdm import tqdm
-from abakit.utilities.shell_tools import get_image_size
+from abakit.lib.utilities_process import get_image_size
 from scipy.interpolate import splprep, splev
 from abakit.lib.utilities_contour_lite import get_contours_from_annotations
 from abakit.settings import DATA_PATH
