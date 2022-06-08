@@ -1,5 +1,5 @@
 from abakit.model.annotation_points import PolygonSequence
-from abakit.model.annotation_session import AnnotationSession,AnnotationType
+from abakit.model.annotation_points import AnnotationSession,AnnotationType
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
 

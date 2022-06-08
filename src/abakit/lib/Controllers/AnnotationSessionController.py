@@ -1,6 +1,5 @@
 from abakit.lib.Controllers.Controller import Controller
-from abakit.model.annotation_session import AnnotationSession,AnnotationType
-from abakit.model.annotation_points import CellSources,COMSources,PolygonSequence
+from abakit.model.annotation_points import AnnotationSession,AnnotationType
 class AnnotationSessionController(Controller):
     def __init__(self,*args,**kwargs):
         """initiates the controller class
@@ -24,3 +23,6 @@ class AnnotationSessionController(Controller):
 
     def delete_annotation_session(self,search_dictionary):
         self.delete_row(search_dictionary,AnnotationSession)
+    
+    def get_annotation_session(self,search_dictonary):
+        return self.get_row(search_dictonary,AnnotationSession)

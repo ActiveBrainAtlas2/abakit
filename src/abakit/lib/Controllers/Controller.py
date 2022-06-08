@@ -9,6 +9,7 @@ class Controller(object):
         self.session,self.pooledsession = self.get_session(host, schema)
 
     def get_session(self, host, schema):
+        print(f'schema {schema}')
         connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
         engine = create_engine(connection_string, echo=False)
         Session = sessionmaker(bind=engine)

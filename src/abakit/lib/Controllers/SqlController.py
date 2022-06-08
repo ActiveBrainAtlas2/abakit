@@ -16,20 +16,23 @@ from abakit.lib.Controllers.SectionsController import SectionsController
 from abakit.lib.Controllers.SlideController import SlideController
 from abakit.lib.Controllers.SlideCZIToTifController import SlideCZIToTifController
 from abakit.lib.Controllers.TasksController import TasksController,file_processed, set_file_completed
+from abakit.lib.Controllers.HistologyController import HistologyController
 from abakit.model.scan_run import ScanRun
 from abakit.model.histology import Histology
 from collections import OrderedDict
 from sqlalchemy.orm.exc import NoResultFound
 from abakit.settings import host,schema
+import numpy as np
 
 class SqlController(ElasticsController,StructuresController,TransformationController,
-    UrlController,AnimalController,ScanRunController,SectionsController,TasksController,SlideController,SlideCZIToTifController):
+    UrlController,AnimalController,ScanRunController,SectionsController,TasksController,
+    SlideController,SlideCZIToTifController,HistologyController):
     """ This is the old sql_controller class.  This is a huge class and we are in the process of breaking it up into smaller
         components.  Each parent class of SqlController would correspond to one table in the database, and include all the 
         methods to interact with that table
     """
 
-    def __init__(self, animal, host=host, schema=schema):
+    def __init__(self, animal='DK39', host=host, schema=schema):
         """ setup the attributes for the SlidesProcessor class
             Args:
                 animal: object of animal to process
@@ -62,7 +65,15 @@ class SqlController(ElasticsController,StructuresController,TransformationContro
         z*=20
         return x,y,z
 
-
+    def get_resolution(self,animal):
+        scan_run = self.get_scan_run(animal)
+        histology = self.get_histology(animal)
+        if histology.orientation == 'coronal':
+            return np.array([scan_run.zresolution,scan_run.resolution,scan_run.resolution])
+        elif histology.orientation == 'horizontal':
+            return np.array([scan_run.resolution,scan_run.zresolution,scan_run.resolution])
+        elif histology.orientation == 'sagittal':
+            return np.array([scan_run.resolution,scan_run.resolution,scan_run.zresolution])
 
 
     

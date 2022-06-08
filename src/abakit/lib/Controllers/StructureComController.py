@@ -1,6 +1,4 @@
 import numpy as np
-from abakit.model.annotation_points import PolygonSequence
-from abakit.model.annotation_session import AnnotationSession,AnnotationType
 from abakit.model.annotation_points import StructureCOM
 import json
 import pandas as pd
