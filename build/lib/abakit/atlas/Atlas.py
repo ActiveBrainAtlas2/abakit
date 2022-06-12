@@ -41,7 +41,6 @@ class Atlas(BrainStructureManager):
         self.COM = self.sqlController.get_atlas_centers()
     
     def get_average_coms(self):
-        self.check_attributes(['structures'])
         annotated_animals = self.sqlController.get_annotated_animals()
         fixed_brain = self.fixed_brain.animal
         annotated_animals = annotated_animals[annotated_animals!=fixed_brain]

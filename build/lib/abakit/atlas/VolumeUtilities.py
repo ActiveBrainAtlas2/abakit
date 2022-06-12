@@ -12,8 +12,9 @@ class VolumeUtilities:
 
     def threshold_volumes(self):
         self.thresholded_volumes = {}
-        self.check_attributes(['volumes', 'structures'])
         assert(hasattr(self, 'threshold'))
+        assert(hasattr(self, 'volumes'))
+        assert(hasattr(self, 'structures'))
         for structurei in self.structures:
             volume = self.volumes[structurei]
             if not volume[volume > 0].size == 0:
@@ -23,7 +24,8 @@ class VolumeUtilities:
             self.thresholded_volumes[structurei] = volume > threshold
     
     def get_origin_from_coms(self):
-        self.check_attributes(['COM', 'volumes'])
+        assert(hasattr(self, 'COM'))
+        assert(hasattr(self, 'volumes'))
         shared_structures = set(self.COM.keys()).intersection(self.volumes.keys())
         volume_coms = np.array([center_of_mass(self.volumes[si]) for si in shared_structures]).astype(int)
         average_com = np.array(list(self.COM.values()))
