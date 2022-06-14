@@ -5,7 +5,7 @@ from abakit.model.atlas_model import Base, AtlasModel
 class SlideCziTif(Base, AtlasModel):
     __tablename__ = 'slide_czi_to_tif'
     id =  Column(Integer, primary_key=True, nullable=False)
-    slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
+    FK_slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
     file_name = Column(String, nullable=False)
     scene_number = Column(Integer, nullable=False)
     width = Column(Integer)
@@ -60,7 +60,7 @@ class Section(Base, AtlasModel):
     scene_index = Column(Integer, nullable=False)
     channel = Column(Integer, nullable=False)
     channel_index = Column(Integer, nullable=False)
-    slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
+    FK_slide_id = Column(Integer, ForeignKey('slide.id'), nullable=False)
     def get_rotation(self):
         return getattr(self.slide,f'scene_rotation_{self.scene_number}')
 
