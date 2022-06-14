@@ -2,6 +2,7 @@ import os
 from PIL import Image
 from aicspylibczi import CziFile
 from tifffile import imsave
+from abakit.lib.utilities_mask import equalized
 class CZIManager:
     def __init__(self,czi_file):
         self.czi_file = czi_file
@@ -32,10 +33,12 @@ def extract_tiff_from_czi(czi_file,file_name,channel=1,scale=1):
         data = czi.get_scene(scale=scale,scene_index=scenei,channel = channel)
         imsave(file_name,data)
 
-def extract_png_from_czi(czi_file,file_name,channel=1,scale=1):
+def extract_png_from_czi(czi_file,file_name,channel=1,scale=1,normalize = True):
     czi = CZIManager(czi_file)
     nscenes = czi.get_nscene()
     for scenei in range(nscenes):
         data = czi.get_scene(scale=scale,scene_index=scenei,channel = channel)
+        if normalize:
+            data = equalized(data)
         im = Image.fromarray(data)
         im.save(file_name)
