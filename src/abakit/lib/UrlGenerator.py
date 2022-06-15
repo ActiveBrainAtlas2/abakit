@@ -7,11 +7,40 @@ class UrlGenerator:
         self.layers = []
         self.controller = SqlController('DK52')
     
-    def add_stack_image(self,animal,channel,name=None):
+    def add_stack_image(self,animal,channel,name=None,color = None):
         if name == None:
             name = animal
+        rgb_code = dict(red = 'vec3(pix,0,0)',green = 'vec3(0,pix,0)')
         source = f'precomputed://https://activebrainatlas.ucsd.edu/data/{animal}/neuroglancer_data/C{channel}'
-        self.add_precomputed_image_layer(source,animal)
+        if color is not None:
+            shader = '''#uicontrol invlerp normalized  (range=[0,5000])
+                        #uicontrol float gamma slider(min=0.05, max=2.5, default=1.0, step=0.05)
+                        #uicontrol bool colour checkbox(default=true)
+
+                        void main() {
+                            float pix =  normalized();
+                            pix = pow(pix,gamma);
+
+                            if (colour) {
+                            emitRGB(vec3('''+rgb_code+'''));
+                            } else {
+                            emitGrayscale(pix) ;
+                            }
+
+                        }
+                        '''
+        else:
+            shader ='''
+                    #uicontrol invlerp normalized
+                    #uicontrol float gamma slider(min=0.05, max=2.5, default=1.0, step=0.05)
+
+                    void main() {
+                        float pix =  normalized();
+                        pix = pow(pix,gamma);
+                        emitGrayscale(pix) ;
+                    }
+                    '''
+        self.add_precomputed_image_layer(source,animal,shader)
     
     def add_segmentation_layer(self,folder_name,layer_name):
         segment_layer = dict( type = "segmentation",
@@ -20,14 +49,16 @@ class UrlGenerator:
                             name = layer_name)
         self.layers.append(segment_layer)
 
-    def add_precomputed_image_layer(self,source,name):
+    def add_precomputed_image_layer(self,source,name,shader=None):
         image_layer = dict( type = "image",
                             source = source,
                             tab = "source",
                             name = name)
+        if shader is not None:
+            image_layer['shader']=shader
         self.layers.append(image_layer)
     
-    def add_annotation_layer(self,name,color_hex= None,annotations = None,shader_controls = None):
+    def add_annotation_layer(self,name,color_hex= None,annotations = None):
         if annotations:
             annotation_layer = dict(type =  "annotation",
                                     source=  dict(  url = "local://annotations",
@@ -35,8 +66,6 @@ class UrlGenerator:
                                     name = name)
         if annotations:
             annotation_layer['annotations'] = annotations
-        if shader_controls:
-            annotation_layer['shaderControls'] = shaderControls
         if color_hex != None:
             annotation_layer = self.insert_annotation_color_hex(annotation_layer,color_hex)
         self.layers.append(annotation_layer)
