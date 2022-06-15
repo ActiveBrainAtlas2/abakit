@@ -6,7 +6,7 @@ from abakit.lib.utilities_mask import equalized
 class CZIManager:
     def __init__(self,czi_file):
         self.czi_file = czi_file
-        self.file = CziFile("/net/birdstore/Active_Atlas_Data/data_root/pipeline_data/DK73/czi/DK73_slide028_2022_03_01_axion2.czi")
+        self.file = CziFile(czi_file)
 
     def get_nscene(self):
         if not hasattr(self,'nscene'):
