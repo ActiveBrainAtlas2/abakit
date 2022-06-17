@@ -74,6 +74,8 @@ class AnnotationLayer:
             point.description = point_json['description']
         if 'category' in point_json:
             point.category = point_json['category']
+        if point.category =='':
+            point.category = 'Null'
         return point
     
     def parse_line(self, line_json):
@@ -286,6 +288,8 @@ class Cell(Point):
     def __init__(self, coord, id):
         super().__init__(coord,id)
         self._type = 'cell'
+        self.category = 'Null'
+        self.description = 'Null'
 
 class Line(Annotation):
     '''
@@ -513,7 +517,7 @@ def create_point_annotation(coordinates,description=None,category = None,type = 
     """    
     point_annotation = {}
     point_annotation['id'] = random_string()
-    point_annotation['point'] = coordinates
+    point_annotation['point'] = list(coordinates)
     point_annotation['type'] = type
     if description is not None:
         point_annotation['description'] = description
