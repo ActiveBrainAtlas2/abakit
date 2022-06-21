@@ -42,7 +42,7 @@ class UrlGenerator:
                         emitGrayscale(pix) ;
                     }
                     '''
-        self.add_precomputed_image_layer(source,animal,shader)
+        self.add_precomputed_image_layer(source,f'{animal}_CH{channel}',shader)
     
     def add_segmentation_layer(self,folder_name,layer_name):
         segment_layer = dict( type = "segmentation",
