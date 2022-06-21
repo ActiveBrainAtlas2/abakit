@@ -174,4 +174,4 @@ class FileLocationManager(object):
         Returns:
             str: path to the log dir and file [for pipeline]
         """
-        return os.path.join(self.stack, "pipeline_" + self.animal + ".log")
+        return os.path.join(self.stack)

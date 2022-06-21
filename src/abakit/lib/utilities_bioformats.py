@@ -24,6 +24,12 @@ def get_czi_metadata(infile):
         metadata_dict[i]['width'] = image.Pixels.SizeX
         metadata_dict[i]['height'] = image.Pixels.SizeY
         metadata_dict[i]['channels'] = image.Pixels.channel_count
+        metadata_dict[i][
+            "resolution"
+        ] = image.Pixels.PhysicalSizeX  # to scan_run table
+        metadata_dict[i][
+            "acquisition_date"
+        ] = image.AcquisitionDate  # to scan_run table
 
     image = metadata.image(0)
     for i in range(image.Pixels.channel_count):
