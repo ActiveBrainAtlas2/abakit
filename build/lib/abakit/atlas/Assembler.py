@@ -2,14 +2,16 @@ import numpy as np
 from abakit.atlas.Atlas import BrainStructureManager
 from abakit.atlas.VolumeUtilities import VolumeUtilities
 from abakit.lib.Brain import Brain
-from abakit.atlas.Atlas import AtlasInitiator
+from abakit.atlas.Atlas import AtlasInitiator,Atlas
+from scipy.ndimage import center_of_mass
+from skimage.filters import gaussian
 
-
-class Assembler:
+class Assembler(BrainStructureManager):
 
     def __init__(self,check = True,*arg,**kwarg):
         if check:
-            self.check_attributes(['volumes', 'structures', 'origins'])
+            self.load_volumes()
+            self.load_origins()
 
     def initialize_origins_and_volumes(self):
         if not self.origins == {}:
@@ -75,7 +77,7 @@ class Assembler:
         self.mirror_volumes_of_paired_structures()
 
     def find_mid_point_from_paired_structures(self):
-        self.check_attributes(['origins'])
+        self.load_origins()
         mid_points = []
         for structure, origin in self.origins.items():
             if '_L' in structure:
@@ -87,13 +89,13 @@ class Assembler:
         return mid_point
 
     def center_mid_line_structures(self, mid_point):
-        self.check_attributes(['COM'])
+        self.load_com()
         for structure, origin in self.COM.items():
             if not '_' in structure:
                 self.COM[structure][2] = mid_point
 
     def find_mid_point_from_midline_structures(self):
-        self.check_attributes(['COM'])
+        self.load_com()
         mid_points = []
         for structure, origin in self.COM.items():
             if not '_' in structure:
@@ -104,7 +106,7 @@ class Assembler:
         return mid_point
     
     def mirror_COMs(self, mid_point):
-        self.check_attributes(['COM'])
+        self.load_com()
         for structure, com_z_right in self.COM.items():
             if '_L' in structure:
                 right_structure = structure.split('_')[0] + '_R'
@@ -122,25 +124,16 @@ class Assembler:
                     self.volumes[structure] = self.volumes[structure_right][:,:,::-1]
 
 
-class CustomAssembler(Brain, VolumeUtilities, Assembler):
+class CustomAssembler(Assembler):
 
     def __init__(self, animal,*arg,**kwarg):
         Brain.__init__(self, animal,*arg,**kwarg)
         identity = lambda: {}
-        self.attribute_functions = dict(
-            origins=identity,
-            volumes=identity,
-            structures=self.set_structure, **self.attribute_functions)
         self.volumes = {}
         self.origins = {}
         Assembler.__init__(self,*arg,**kwarg)
-    
-    def set_structure(self):
-        possible_attributes_with_structure_list = ['origins', 'COM', 'volumes']
-        self.set_structure_from_attribute(possible_attributes_with_structure_list)
 
-
-class BrainAssembler(BrainStructureManager, Assembler):
+class BrainAssembler(Assembler):
 
     def __init__(self, animal, threshold, *args, **kwargs):
         BrainStructureManager.__init__(self, animal, *args, **kwargs)
@@ -157,3 +150,20 @@ class AtlasAssembler(AtlasInitiator, Assembler):
         self.origins = self.get_origin_from_coms()
         Assembler.__init__(self)    
 
+def get_v7_volume_and_origin():
+    atlas = Atlas(atlas = 'atlasV7')
+    atlas.load_volumes()
+    atlas.load_com()
+    volume_coms = np.array([center_of_mass(atlas.volumes[si]) for si in atlas.COM.keys()]).astype(int)
+    average_com = np.array(list(atlas.COM.values()))/np.array([10,10,20])
+    origins = average_com - volume_coms
+    atlas.origins = dict(zip(atlas.COM.keys(),origins))
+    sorted_keys = sorted(atlas.volumes.keys())
+    for key,value in atlas.volumes.items():
+        if key in ['SC','IC']:
+            atlas.volumes[key] = gaussian(value,2)>0.1
+        else:
+            atlas.volumes[key] = gaussian(value,2)>0.5
+    atlas.volumes  = dict(zip(sorted_keys,[atlas.volumes[keyi] for keyi in sorted_keys]))
+    atlas.origins  = dict(zip(sorted_keys,[atlas.origins[keyi] for keyi in sorted_keys]))
+    return atlas.volumes,atlas.origins

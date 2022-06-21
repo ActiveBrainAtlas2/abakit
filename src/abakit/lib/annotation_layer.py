@@ -1,7 +1,10 @@
 '''
 Put file doc info here
 '''
-
+import string
+import random
+from unicodedata import category
+from attr import has
 import numpy as np
 from django.http.response import Http404
 
@@ -71,6 +74,8 @@ class AnnotationLayer:
             point.description = point_json['description']
         if 'category' in point_json:
             point.category = point_json['category']
+        if point.category =='':
+            point.category = 'Null'
         return point
     
     def parse_line(self, line_json):
@@ -266,8 +271,13 @@ class Point(Annotation):
     def to_json(self):
         """convert the point annotation to neuroglancer json state 
         """        
-        point_json = {}
-        ...
+        if hasattr(self,'description'):
+            point_json = create_point_annotation(self.coord,self.description,type = self._type)
+        else:
+            point_json = create_point_annotation(self.coord,'',type = self._type)
+        if hasattr(self,'category'):
+            point_json['category'] = self.category
+        return point_json
 
 class COM(Point):
     def __init__(self, coord, id):
@@ -278,6 +288,8 @@ class Cell(Point):
     def __init__(self, coord, id):
         super().__init__(coord,id)
         self._type = 'cell'
+        self.category = 'Null'
+        self.description = 'Null'
 
 class Line(Annotation):
     '''
@@ -486,3 +498,29 @@ def check_if_contour_points_are_in_order(first_point, start_points, end_points):
     npoints = len(start_points)
     for i in range(npoints - 1):
         assert np.all(np.isclose(start_points[i + 1], end_points[i],atol=0.1))
+
+def random_string() -> str:
+    '''
+    Creates a 40 char string of random characters
+    '''
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=40))
+
+def create_point_annotation(coordinates,description=None,category = None,type = 'point'):
+    """create annotation points in the neuroglancer json format
+
+    Args:
+        coordinates (list): list of coordinates: x,y,z for this annotation point
+        description (str): the description field of this annotation point.  This would be displayed in neuroglancer 
+
+    Returns:
+        _type_: _description_
+    """    
+    point_annotation = {}
+    point_annotation['id'] = random_string()
+    point_annotation['point'] = list(coordinates)
+    point_annotation['type'] = type
+    if description is not None:
+        point_annotation['description'] = description
+    if category is not None:
+        point_annotation['category'] = category
+    return point_annotation

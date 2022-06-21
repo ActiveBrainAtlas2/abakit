@@ -19,7 +19,6 @@ class Brain:
         self.sqlController = SqlController(self.animal)
         self.path = FileLocationManager(animal)
         self.plotter = Plotter()
-        self.attribute_functions = dict(COM=self.load_com)
         to_um = self.get_resolution()
         self.pixel_to_um = np.array([to_um, to_um, 20])
         self.um_to_pixel = 1 / self.pixel_to_um
@@ -42,38 +41,20 @@ class Brain:
         height = self.sqlController.scan_run.height
         return np.array([width, height])
     
-    def check_attributes(self, attribute_list):
-        """Checks if the class has certain attribute.
-           If the attribute is not found, attempt to load/create the 
-           attribute using a list of predefined functions
-
-        Args:
-            attribute_list (list of string): list of attribute names to check
-
-        Raises:
-            NotImplementedError: _description_
-        """        
-        assert(hasattr(self , 'attribute_functions'))
-        for attribute in attribute_list:
-            if not hasattr(self, attribute) or getattr(self, attribute) == {}:
-                if attribute in self.attribute_functions:
-                    self.attribute_functions[attribute]()
-                else:
-                    raise NotImplementedError
-    
     def get_com_array(self):
         """Get the center of mass values for this brain as an array
 
         Returns:
             np array: COM of the brain 
         """        
-        self.check_attributes(['COM'])
+        self.load_com()
         return np.array(list(self.COM.values()))
         
     def load_com(self):
         """load the com attribute of this brain indexed by each region
         """        
-        self.COM = self.sqlController.get_com_dict(self.animal)
+        if not hasattr(self,'COM'):
+            self.COM = self.sqlController.get_com_dict(self.animal)
     
     def get_shared_coms(self, com_dictionary1, com_dictionary2):
         """Get keys that are shared by two dictionaries

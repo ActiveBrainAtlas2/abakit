@@ -2,6 +2,7 @@ from grp import struct_group
 import os
 import json
 from abakit.settings import ATLAS,DATA_PATH
+from attr import has
 import numpy as np
 from abakit.lib.Brain import Brain
 from abakit.atlas.VolumeUtilities import VolumeUtilities
@@ -22,19 +23,11 @@ class BrainStructureManager(VolumeUtilities):
         self.atlas = atlas
         if check_path:
             self.set_path_and_create_folders()
-        self.attribute_functions = dict(
-            origins=self.load_origins,
-            volumes=self.load_volumes,
-            aligned_contours=self.load_aligned_contours,
-            structures=self.set_structure, **self.attribute_functions)
+
         self.DOWNSAMPLE_FACTOR = downsample_factor
         to_um = self.DOWNSAMPLE_FACTOR * self.get_resolution()
         self.pixel_to_um = np.array([to_um, to_um, 20])
         self.um_to_pixel = 1 / self.pixel_to_um
-
-    def set_structure(self):
-        possible_attributes_with_structure_list = ['origins', 'COM', 'volumes', 'thresholded_volumes', 'aligned_contours']
-        self.set_structure_from_attribute(possible_attributes_with_structure_list)
     
     def set_path_and_create_folders(self):
         self.animal_directory = os.path.join(DATA_PATH, 'atlas_data', self.atlas, self.animal)
@@ -48,26 +41,39 @@ class BrainStructureManager(VolumeUtilities):
         os.makedirs(self.origin_path, exist_ok=True)
 
     def load_origins(self):
-        assert(os.path.exists(self.origin_path))
-        origin_files = sorted(os.listdir(self.origin_path))
-        for filei in origin_files:
-            structure = os.path.splitext(filei)[0]    
-            self.origins[structure] = np.loadtxt(os.path.join(self.origin_path, filei))
-    
+        if not hasattr(self,'origins'):
+            assert(os.path.exists(self.origin_path))
+            origin_files = sorted(os.listdir(self.origin_path))
+            for filei in origin_files:
+                structure = os.path.splitext(filei)[0]    
+                self.origins[structure] = np.loadtxt(os.path.join(self.origin_path, filei))
+                self.set_structures(list(self.origins.keys()))
+        
     def load_volumes(self):
-        assert(os.path.exists(self.volume_path))
-        volume_files = sorted(os.listdir(self.volume_path))
-        for filei in volume_files:
-            structure = os.path.splitext(filei)[0]    
-            self.volumes[structure] = np.load(os.path.join(self.volume_path, filei))
-    
+        if not hasattr(self,'volumes'):
+            assert(os.path.exists(self.volume_path))
+            volume_files = sorted(os.listdir(self.volume_path))
+            for filei in volume_files:
+                structure = os.path.splitext(filei)[0]    
+                self.volumes[structure] = np.load(os.path.join(self.volume_path, filei))
+            self.set_structures(list(self.volumes.keys()))
+            
+        
     def load_aligned_contours(self):
-        with open(self.align_and_padded_contour_path) as f:
-            self.set_aligned_contours(json.load(f))
+        if not hasattr(self,'aligned_contours'):
+            with open(self.align_and_padded_contour_path) as f:
+                self.set_aligned_contours(json.load(f))
+                self.set_structures(list(self.aligned_contours.keys()))
+
 
     def set_aligned_contours(self,contours):
         self.aligned_contours = contours
-        self.structures = list(self.aligned_contours.keys())  
+    
+    def set_structures(self,structures):
+        if not hasattr(self,'structures'):
+            self.structures = structures
+        else:
+            assert np.all(np.array(self.structures)==np.array(structures))
 
     def save_contours(self):
         assert(hasattr(self, 'original_structures'))
@@ -81,7 +87,8 @@ class BrainStructureManager(VolumeUtilities):
             json.dump(self.aligned_structures, f, sort_keys=True)
 
     def save_volumes(self):
-        self.check_attributes(['volumes', 'structures'])
+        assert hasattr(self,'volumes')
+        assert hasattr(self,'structures')
         os.makedirs(self.volume_path, exist_ok=True)
         for structurei in self.structures:
             volume = self.volumes[structurei]
@@ -89,7 +96,7 @@ class BrainStructureManager(VolumeUtilities):
             np.save(volume_filepath, volume)
     
     def save_mesh_files(self):
-        self.check_attributes(['volumes'])
+        assert hasattr(self,'volumes')
         self.calculate_fixed_brain_center()
         self.COM = self.get_average_coms()
         self.convert_unit_of_com_dictionary(self.COM, self.fixed_brain.um_to_pixel)
@@ -102,7 +109,8 @@ class BrainStructureManager(VolumeUtilities):
             save_mesh(aligned_structure, filepath)
 
     def save_origins(self):
-        self.check_attributes(['origins', 'structures'])
+        assert hasattr(self,'origins')
+        assert hasattr(self,'structures')
         os.makedirs(self.origin_path, exist_ok=True)
         for structurei in self.structures:
             x, y, z = self.origins[structurei]
@@ -110,7 +118,8 @@ class BrainStructureManager(VolumeUtilities):
             np.savetxt(origin_filepath, (x, y, z))
     
     def save_coms(self):
-        self.check_attributes(['COM', 'structures'])
+        self.load_com()
+        self.set_structures(list(self.COM.values()))
         for structurei in self.structures:
             if structurei in self.COM:
                 coordinates = self.COM[structurei]
@@ -123,11 +132,11 @@ class BrainStructureManager(VolumeUtilities):
         return list(self.aligned_contours[structurei].values())
     
     def get_origin_array(self):
-        self.check_attributes(['origins'])
+        self.load_origins()
         return np.array(list(self.origins.values()))
     
     def get_volume_list(self):
-        self.check_attributes(['volumes'])
+        self.load_volumes()
         return np.array(list(self.volumes.values()))
 
     def plot_volume_3d(self, structure='10N_L'):
@@ -147,7 +156,7 @@ class BrainStructureManager(VolumeUtilities):
         self.plotter.set_show_as_true()
 
     def plot_contours_for_all_structures(self):
-        self.check_attributes(['aligned_contours', 'structures'])
+        self.load_aligned_contours()
         all_structures = []
         for structurei in self.structures:
             contour = self.aligned_contours[structurei]

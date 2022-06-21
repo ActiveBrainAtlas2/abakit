@@ -21,7 +21,7 @@ class SlideCZIToTifController(Controller):
         slides = self.session.query(Slide).filter(Slide.scan_run_id == self.scan_run.id)\
             .filter(Slide.slide_status == 'Good').all()
         slide_czi_to_tifs = self.session.query(SlideCziTif).filter(SlideCziTif.channel == channel)\
-            .filter(SlideCziTif.slide_id.in_([slide.id for slide in slides]))\
+            .filter(SlideCziTif.FK_slide_id.in_([slide.id for slide in slides]))\
             .filter(SlideCziTif.active == 1).all()
 
         return slide_czi_to_tifs
