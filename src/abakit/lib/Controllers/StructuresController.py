@@ -1,4 +1,4 @@
-from abakit.model.brain_region import BrainRegion
+from abakit.model.structure import Structure
 from sqlalchemy import func
 from abakit.lib.Controllers.Controller import Controller
 from sqlalchemy.orm.exc import NoResultFound
@@ -17,8 +17,8 @@ class StructuresController(Controller):
         :param abbrv: the abbreviation of the structure
         :return: tuple of rgb
         """
-        row = self.session.query(BrainRegion).filter(
-            BrainRegion.abbreviation == func.binary(abbrv)).one()
+        row = self.session.query(Structure).filter(
+            Structure.abbreviation == func.binary(abbrv)).one()
         return int(row.color)
 
     def get_structure_color_rgb(self, abbrv):
@@ -28,8 +28,8 @@ class StructuresController(Controller):
         :param abbrv: the abbreviation of the structure
         :return: tuple of rgb
         """
-        row = self.session.query(BrainRegion).filter(
-            BrainRegion.abbreviation == func.binary(abbrv)).one()
+        row = self.session.query(Structure).filter(
+            Structure.abbreviation == func.binary(abbrv)).one()
         hexa = row.hexadecimal
         h = hexa.lstrip('#')
         return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
@@ -40,7 +40,7 @@ class StructuresController(Controller):
         Returns:
             list: list of structure ORM
         """        
-        return self.session.query(BrainRegion).filter(BrainRegion.active.is_(True)).all()
+        return self.session.query(Structure).filter(Structure.active.is_(True)).all()
 
     def get_structure_description_and_color(self):
         """returns the dictionary of structure abbreviation,description and color
@@ -48,10 +48,10 @@ class StructuresController(Controller):
         Returns:
             dict: dictionary of structure description and color indexes by structure abbreviation
         """        
-        rows = self.session.query(BrainRegion)\
-            .filter(BrainRegion.abbreviation != 'R')\
-            .filter(BrainRegion.is_structure ==1).filter(
-            BrainRegion.active.is_(True)).all()
+        rows = self.session.query(Structure)\
+            .filter(Structure.abbreviation != 'R')\
+            .filter(Structure.is_structure ==1).filter(
+            Structure.active.is_(True)).all()
         structures_dict = {}
         for structure in rows:
             structures_dict[structure.abbreviation] = [
@@ -65,8 +65,8 @@ class StructuresController(Controller):
         :return: list of structures that exists as pairs on both side of the brain. 
         i.e. structures that is not in the midline
         """
-        rows = self.session.query(BrainRegion).filter(
-            BrainRegion.active.is_(True)).all()
+        rows = self.session.query(Structure).filter(
+            Structure.active.is_(True)).all()
         structures = []
         for structure in rows:
             if "_" in structure.abbreviation:
@@ -81,7 +81,7 @@ class StructuresController(Controller):
         :param abbrv: the abbreviation of the structure
         :return: structure object
         """
-        return self.session.query(BrainRegion).filter(BrainRegion.abbreviation == func.binary(abbrv)).one()
+        return self.session.query(Structure).filter(Structure.abbreviation == func.binary(abbrv)).one()
     
         
     def structure_abbreviation_to_id(self,abbreviation):

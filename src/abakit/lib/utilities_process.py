@@ -81,7 +81,7 @@ def workernoshell(cmd):
     proc = Popen(cmd, shell=False, stderr=stderr_f, stdout=stdout_f, env=my_env)
     proc.wait()
 
-def test_dir(animal, directory,section_count, downsample=True, same_size=False):
+def test_dir(animal, directory, downsample=True, same_size=False):
     error = ""
     #thumbnail resolution ntb is 10400 and min size of DK52 is 16074
     #thumbnail resolution thion is 14464 and min size for MD585 is 21954
@@ -91,6 +91,9 @@ def test_dir(animal, directory,section_count, downsample=True, same_size=False):
     min_size = starting_size * SCALING_FACTOR * 1000
     if downsample:
         min_size = starting_size
+    
+    sqlController = SqlController(animal)
+    section_count = sqlController.get_section_count(animal)
     try:
         files = sorted(os.listdir(directory))
     except:

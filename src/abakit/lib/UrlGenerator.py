@@ -7,42 +7,11 @@ class UrlGenerator:
         self.layers = []
         self.controller = SqlController('DK52')
     
-    def add_stack_image(self,animal,channel,name=None,color = None):
-        if not hasattr(self,'dimensions'):
-            self.dimensions = self.controller.get_resolution(animal)/(10**6)
+    def add_stack_image(self,animal,channel,name=None):
         if name == None:
             name = animal
-        rgb_code = dict(red = 'vec3(pix,0,0)',green = 'vec3(0,pix,0)')
         source = f'precomputed://https://activebrainatlas.ucsd.edu/data/{animal}/neuroglancer_data/C{channel}'
-        if color is not None:
-            shader = '''#uicontrol invlerp normalized  (range=[0,5000])
-                        #uicontrol float gamma slider(min=0.05, max=2.5, default=1.0, step=0.05)
-                        #uicontrol bool colour checkbox(default=true)
-
-                        void main() {
-                            float pix =  normalized();
-                            pix = pow(pix,gamma);
-
-                            if (colour) {
-                            emitRGB(vec3('''+rgb_code[color]+'''));
-                            } else {
-                            emitGrayscale(pix) ;
-                            }
-
-                        }
-                        '''
-        else:
-            shader ='''
-                    #uicontrol invlerp normalized
-                    #uicontrol float gamma slider(min=0.05, max=2.5, default=1.0, step=0.05)
-
-                    void main() {
-                        float pix =  normalized();
-                        pix = pow(pix,gamma);
-                        emitGrayscale(pix) ;
-                    }
-                    '''
-        self.add_precomputed_image_layer(source,f'{animal}_CH{channel}',shader)
+        self.add_precomputed_image_layer(source,animal)
     
     def add_segmentation_layer(self,folder_name,layer_name):
         segment_layer = dict( type = "segmentation",
@@ -51,24 +20,24 @@ class UrlGenerator:
                             name = layer_name)
         self.layers.append(segment_layer)
 
-    def add_precomputed_image_layer(self,source,name,shader=None):
+    def add_precomputed_image_layer(self,source,name):
         image_layer = dict( type = "image",
                             source = source,
                             tab = "source",
                             name = name)
-        if shader is not None:
-            image_layer['shader']=shader
         self.layers.append(image_layer)
     
-    def add_annotation_layer(self,name,color_hex= None,annotations = None):
-        annotation_layer = dict(type =  "annotation",
-                                source=  dict(  url = "local://annotations"),
-                                tab = 'annotations',
-                                annotations = [],
-                                name = name)
-        if annotations is not None:
+    def add_annotation_layer(self,name,color_hex= None,annotations = None,shader_controls = None):
+        if annotations:
+            annotation_layer = dict(type =  "annotation",
+                                    source=  dict(  url = "local://annotations",
+                                                    transform = {}),
+                                    name = name)
+        if annotations:
             annotation_layer['annotations'] = annotations
-        if color_hex is not None:
+        if shader_controls:
+            annotation_layer['shaderControls'] = shaderControls
+        if color_hex != None:
             annotation_layer = self.insert_annotation_color_hex(annotation_layer,color_hex)
         self.layers.append(annotation_layer)
 
@@ -79,15 +48,11 @@ class UrlGenerator:
         return annotation_layer
 
     def get_url(self):
-        if hasattr(self,'dimensions'):
-            return json.dumps({'dimensions':{'x':[self.dimensions[0],'m'],'y':[self.dimensions[1],'m'],'z':[self.dimensions[2],'m']},'layers': self.layers})
-        else:
-            return json.dumps({'layers': self.layers})
+        return json.dumps({'layers': self.layers})
     
     def add_to_database(self,title,person_id):
         content = self.get_url()
-        id = self.controller.add_url(content,title,person_id)
-        return id
+        self.controller.add_url(content,title,person_id)
     
     def parse_url(self,url):
         url = json.loads(url.replace('\n',''))
