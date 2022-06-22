@@ -91,3 +91,10 @@ class StructuresController(Controller):
             print(f'No structure found for {abbreviation} {nrf}')
             return
         return structure.id
+
+    def get_segment_to_id_where_segment_are_brain_regions(self):
+        db_structure_infos = self.get_structure_description_and_color()
+        segment_to_id = {}
+        for structure, (_, number) in db_structure_infos.items():
+            segment_to_id[structure] = number
+        return segment_to_id

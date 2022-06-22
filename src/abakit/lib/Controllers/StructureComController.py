@@ -3,6 +3,7 @@ from abakit.model.annotation_points import StructureCOM
 import json
 import pandas as pd
 from abakit.lib.Controllers.Controller import Controller
+from abakit.model.annotation_points import AnnotationSession
 
 class StructureComController(Controller):
     '''The class that queries and addes entry to the StructureCom table'''
@@ -22,11 +23,17 @@ class StructureComController(Controller):
         Returns:
             dict: dictionary of x,y,z coordinates indexed by structure name
         """    
-        coms = self.session.query(StructureCOM)\
-            .filter(StructureCOM.source.FK_prep_id==prep_id)\
-            .filter(StructureCOM.source.FK_annotator_id==annotator_id)\
-            .filter(StructureCOM.source.active==1).all()   
+        sessions = self.session.query(AnnotationSession).filter(AnnotationSession.FK_prep_id==prep_id)\
+                                                        .filter(AnnotationSession.FK_annotator_id==annotator_id)\
+                                                        .filter(AnnotationSession.active==1).all()
+        coms = []
+        for sessioni in sessions:                                                    
+            com = self.session.query(StructureCOM)\
+                .filter(StructureCOM.FK_session_id==sessioni.id).first()   
+            coms.append(com)
         coordinate = [[i.x,i.y,i.z] for i in coms]
-        structure = [i.source.brain_region.abbreviation for i in coms]
+        structure = [i.session.brain_region.abbreviation for i in coms]
         return dict(zip(structure,coordinate))
     
+    def get_atlas_centers(self):
+        return self.get_COM('Atlas',annotator_id=16)
