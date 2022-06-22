@@ -8,9 +8,10 @@ import numpy as np
 
 class Atlas(BrainStructureManager):
     def __init__(self,atlas = ATLAS):
+        BrainStructureManager.__init__(self,'Atlas',sql=True)
         self.atlas = atlas
-        self.fixed_brain = BrainStructureManager('MD589')
-        self.moving_brain = [BrainStructureManager(braini) for braini in ['MD594', 'MD585']]
+        self.fixed_brain = BrainStructureManager('MD589',sql=True)
+        self.moving_brain = [BrainStructureManager(braini,sql=True) for braini in ['MD594', 'MD585']]
         self.brains = self.moving_brain
         self.brains.append(self.fixed_brain)
         super().__init__('Atlas')

@@ -11,10 +11,17 @@ from abakit.lib.utilities_atlas import save_mesh
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from abakit.settings import DATA_PATH
-class BrainStructureManager(VolumeUtilities):
+class BrainStructureManager(Brain,VolumeUtilities):
 
-    def __init__(self, animal,atlas = ATLAS,downsample_factor = 32,check_path = True):
-        self.animal = animal
+    def __init__(self, animal,atlas = ATLAS,downsample_factor = 32,check_path = True,sql = False):
+        self.DOWNSAMPLE_FACTOR = downsample_factor
+        if sql:
+            Brain.__init__(self,animal)
+            to_um = self.DOWNSAMPLE_FACTOR * self.get_resolution()
+            self.pixel_to_um = np.array([to_um, to_um, 20])
+            self.um_to_pixel = 1 / self.pixel_to_um
+        else:
+            self.animal = animal
         self.origins = {}
         self.COM = {}
         self.volumes = {}
@@ -22,12 +29,7 @@ class BrainStructureManager(VolumeUtilities):
         self.thresholded_volumes = {}
         self.atlas = atlas
         if check_path:
-            self.set_path_and_create_folders()
-
-        self.DOWNSAMPLE_FACTOR = downsample_factor
-        to_um = self.DOWNSAMPLE_FACTOR * self.get_resolution()
-        self.pixel_to_um = np.array([to_um, to_um, 20])
-        self.um_to_pixel = 1 / self.pixel_to_um
+            self.set_path_and_create_folders()        
     
     def set_path_and_create_folders(self):
         self.animal_directory = os.path.join(DATA_PATH, 'atlas_data', self.atlas, self.animal)
