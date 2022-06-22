@@ -23,9 +23,9 @@ class StructureComController(Controller):
             dict: dictionary of x,y,z coordinates indexed by structure name
         """    
         coms = self.session.query(StructureCOM)\
-            .filter(StructureCOM.source.FK_prep_id==prep_id)\
-            .filter(StructureCOM.source.FK_annotator_id==annotator_id)\
-            .filter(StructureCOM.source.active==1).all()   
+            .filter(StructureCOM.session.FK_prep_id==prep_id)\
+            .filter(StructureCOM.session.FK_annotator_id==annotator_id)\
+            .filter(StructureCOM.session.active==1).all()   
         coordinate = [[i.x,i.y,i.z] for i in coms]
         structure = [i.source.brain_region.abbreviation for i in coms]
         return dict(zip(structure,coordinate))
