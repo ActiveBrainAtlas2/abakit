@@ -16,7 +16,7 @@ class BrainStructureManager(Brain,VolumeUtilities):
     def __init__(self, animal,atlas = ATLAS,downsample_factor = 32,check_path = True,sql = False):
         self.DOWNSAMPLE_FACTOR = downsample_factor
         if sql:
-            Brain.__init__(self,animal)
+            Brain.__init__(self,animal,sql = True)
             to_um = self.DOWNSAMPLE_FACTOR * self.get_resolution()
             self.pixel_to_um = np.array([to_um, to_um, 20])
             self.um_to_pixel = 1 / self.pixel_to_um
@@ -53,13 +53,15 @@ class BrainStructureManager(Brain,VolumeUtilities):
         
     def load_volumes(self):
         if not hasattr(self,'volumes'):
-            assert(os.path.exists(self.volume_path))
-            volume_files = sorted(os.listdir(self.volume_path))
-            for filei in volume_files:
-                structure = os.path.splitext(filei)[0]    
+            self.volumes = {}
+        assert(os.path.exists(self.volume_path))
+        volume_files = sorted(os.listdir(self.volume_path))
+        for filei in volume_files:
+            structure = os.path.splitext(filei)[0]    
+            if structure not in self.volumes:
                 self.volumes[structure] = np.load(os.path.join(self.volume_path, filei))
-            self.set_structures(list(self.volumes.keys()))
-            
+        self.set_structures(list(self.volumes.keys()))
+        
         
     def load_aligned_contours(self):
         if not hasattr(self,'aligned_contours'):

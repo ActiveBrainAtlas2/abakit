@@ -5,6 +5,7 @@ from abakit.lib.Brain import Brain
 from abakit.atlas.Atlas import AtlasInitiator,Atlas
 from scipy.ndimage import center_of_mass
 from skimage.filters import gaussian
+from abakit.lib.Controllers.SqlController import SqlController
 
 class Assembler(BrainStructureManager):
 
@@ -43,10 +44,8 @@ class Assembler(BrainStructureManager):
             segment_to_id[structure] = number
         return segment_to_id
 
-    def assemble_all_structure_volume(self,segment_to_id = None):
+    def assemble_all_structure_volume(self,segment_to_id):
         self.initialize_origins_and_volumes()
-        if segment_to_id is None:
-            segment_to_id = self.get_segment_to_id_where_segment_are_brain_regions()
         size = self.get_bounding_box()
         size = size + np.array([10, 10, 10])
         self.combined_volume = np.zeros(size, dtype=np.uint8)
@@ -167,3 +166,16 @@ def get_v7_volume_and_origin():
     atlas.volumes  = dict(zip(sorted_keys,[atlas.volumes[keyi] for keyi in sorted_keys]))
     atlas.origins  = dict(zip(sorted_keys,[atlas.origins[keyi] for keyi in sorted_keys]))
     return atlas.volumes,atlas.origins
+
+
+def get_assembled_atlas_v7():
+    controller = SqlController('DK39')
+    atlas = Atlas(atlas = 'atlasV7')
+    atlas.get_com_array()
+    assembler = Assembler(check=False,side = '_R')
+    assembler.volumes,assembler.origins = get_v7_volume_and_origin()
+    assembler.sqlController = atlas.sqlController
+    assembler.structures = list(assembler.volumes.keys())
+    segment_to_id = controller.get_segment_to_id_where_segment_are_brain_regions()
+    assembler.assemble_all_structure_volume(segment_to_id)
+    return assembler

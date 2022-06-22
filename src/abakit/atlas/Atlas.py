@@ -10,6 +10,8 @@ class Atlas(BrainStructureManager):
     def __init__(self,atlas = ATLAS):
         BrainStructureManager.__init__(self,'Atlas',sql=True)
         self.atlas = atlas
+        self.animal = atlas
+        self.set_path_and_create_folders()
         self.fixed_brain = BrainStructureManager('MD589',sql=True)
         self.moving_brain = [BrainStructureManager(braini,sql=True) for braini in ['MD594', 'MD585']]
         self.brains = self.moving_brain
@@ -76,3 +78,4 @@ class AtlasInitiator(Atlas):
         self.structures = list(self.COM.keys())
         self.convert_unit_of_com_dictionary(self.COM,conversion_factor)
         self.origins = self.get_origin_from_coms()
+ 
