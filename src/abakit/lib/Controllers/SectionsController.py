@@ -91,7 +91,7 @@ class SectionsController(Controller):
         Returns: list of sections with distinct file names
 
         """
-        sections = self.session.query(Section.czi_file, Section.file_name, Section.scene_index,  Section.channel_index).distinct()\
+        sections = self.session.query(Section.czi_file, Section.file_name, Section.scene_number,  Section.channel_index).distinct()\
             .filter(Section.prep_id == animal).filter(
             Section.channel == channel).all()
 

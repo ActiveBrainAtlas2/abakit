@@ -8,6 +8,7 @@ import sys
 from abakit.lib.Controllers.Controller import Controller
 from abakit.lib.Controllers.ElasticsController import ElasticsController
 from abakit.lib.Controllers.StructuresController import StructuresController
+from abakit.lib.Controllers.StructureComController import StructureComController
 from abakit.lib.Controllers.TransformationController import TransformationController
 from abakit.lib.Controllers.AnimalController import AnimalController
 from abakit.lib.Controllers.UrlController import UrlController
@@ -26,7 +27,7 @@ import numpy as np
 
 class SqlController(ElasticsController,StructuresController,TransformationController,
     UrlController,AnimalController,ScanRunController,SectionsController,TasksController,
-    SlideController,SlideCZIToTifController,HistologyController):
+    SlideController,SlideCZIToTifController,HistologyController,StructureComController):
     """ This is the old sql_controller class.  This is a huge class and we are in the process of breaking it up into smaller
         components.  Each parent class of SqlController would correspond to one table in the database, and include all the 
         methods to interact with that table

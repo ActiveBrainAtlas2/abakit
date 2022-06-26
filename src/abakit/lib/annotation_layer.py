@@ -17,10 +17,8 @@ class AnnotationLayer:
 
     def __init__(self, annotation_layer=default_annotation_layer):
         """Initiates the AnnotationLayer object with the neuroglancer json state of one layer
-
         Args:
             annotation_layer (dict, optional): The neuroglancer json state of one annotation layer. Defaults to default_annotation_layer.
-
         Raises:
             Http404: django http404 response
         """        
@@ -74,6 +72,8 @@ class AnnotationLayer:
             point.description = point_json['description']
         if 'category' in point_json:
             point.category = point_json['category']
+        if point.category =='':
+            point.category = 'Null'
         return point
     
     def parse_line(self, line_json):
@@ -181,7 +181,6 @@ class AnnotationLayer:
     
     def get_volumes(self):
         """return all the volumes int this layer
-
         Returns:
             list: list of volume annotations
         """        
@@ -189,7 +188,6 @@ class AnnotationLayer:
 
     def get_polygons(self):
         """get list of all polygon
-
         Returns:
             list: list of all polygon annotations
         """        
@@ -207,35 +205,30 @@ class Annotation:
     """    
     def is_point(self):
         """checks if an annotation is a point
-
         Returns:
             bool: if annotaion is point
         """        
         return self._type == 'point'
     def is_polygon(self):
         """checks if an annotation is a polygon
-
         Returns:
             bool: if annotation is a polygon
         """        
         return self._type == 'polygon'
     def is_volume(self):
         """checks if an annotation is a volume
-
         Returns:
             bool: if annotation is volume
         """        
         return self._type == 'volume'
     def is_line(self):
         """checks if an annotation is a line
-
         Returns:
             bool: if annotation is line
         """        
         return self._type == 'line'
     def get_description(self):
         """get the description of the 
-
         Returns:
             str: the description field of the annotation point
         """        
@@ -257,7 +250,6 @@ class Point(Annotation):
 
     def __init__(self, coord, id):
         """initialize the point annotation
-
         Args:
             coord (list): list of x,y,z coordinates
             id (str): UUID for point annotations
@@ -286,6 +278,8 @@ class Cell(Point):
     def __init__(self, coord, id):
         super().__init__(coord,id)
         self._type = 'cell'
+        self.category = 'Null'
+        self.description = 'Null'
 
 class Line(Annotation):
     '''
@@ -294,7 +288,6 @@ class Line(Annotation):
 
     def __init__(self, coord_start, coord_end, id):
         """Initializes the line annotation
-
         Args:
             coord_start (list): list of x,y,z, coordinate of the starting point
             coord_end (list): list of x,y,z coordinate of the ending point
@@ -321,7 +314,6 @@ class Polygon(Annotation):
 
     def __init__(self, id, child_ids, source):
         """Initilaizes the polygon
-
         Args:
             id (str): UUID of the polygon annotation
             child_ids (list): list of child annotations
@@ -342,7 +334,6 @@ class Polygon(Annotation):
     
     def to_numpy(self):
         """convert the points in the polygon to a np array
-
         Returns:
             _type_: _description_
         """        
@@ -351,10 +342,8 @@ class Polygon(Annotation):
     def get_section_direction(self,points):
         """find the direction where the sections are made.  That direction would be whichever x,y,z direction that 
         always have the same orientation
-
         Args:
             points (list): list of x,y,z coordinates
-
         Returns:
             int: integer of sectioning direction 0,1,2 corresponding to x,y,z
         """        
@@ -366,7 +355,6 @@ class Polygon(Annotation):
     
     def get_section_and_2d_contours(self):
         """Get the 2d contours indexed by section number
-
         Returns:
             dict: dictionary of 2d contours indexed by section number
         """        
@@ -384,7 +372,6 @@ class Volume(Annotation):
 
     def __init__(self, id, child_ids, source):
         """Initialize the volume annotation
-
         Args:
             id (str): UUID of volume annotatin
             child_ids (list): list of id for child annotations
@@ -400,7 +387,6 @@ class Volume(Annotation):
     
     def get_volume_name_and_contours(self,downsample_factor = 1):
         """Get the name of volume and dictionary of contours
-
         Returns:
             str,dict: The name of the volume in question and the dictionary containing the contour points
         """        
@@ -503,17 +489,15 @@ def random_string() -> str:
 
 def create_point_annotation(coordinates,description=None,category = None,type = 'point'):
     """create annotation points in the neuroglancer json format
-
     Args:
         coordinates (list): list of coordinates: x,y,z for this annotation point
         description (str): the description field of this annotation point.  This would be displayed in neuroglancer 
-
     Returns:
         _type_: _description_
     """    
     point_annotation = {}
     point_annotation['id'] = random_string()
-    point_annotation['point'] = coordinates
+    point_annotation['point'] = list(coordinates)
     point_annotation['type'] = type
     if description is not None:
         point_annotation['description'] = description

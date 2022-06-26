@@ -8,7 +8,7 @@ class Brain:
     """Basic class for the preprocessing pipeline, Cell Detection, contour processing and atlas creation
     """    
 
-    def __init__(self, animal,*arg,**kwarg):
+    def __init__(self, animal,sql = True,*arg,**kwarg):
         """Initiates the brain object, starts the sqalchemy session, sets the location for the pipeline, readies the plotter 
         and loads the resolution of the brian
 
@@ -16,7 +16,8 @@ class Brain:
             animal (string): Animal ID
         """        
         self.animal = animal
-        self.sqlController = SqlController(self.animal)
+        if sql:
+            self.sqlController = SqlController(self.animal)
         self.path = FileLocationManager(animal)
         self.plotter = Plotter()
         to_um = self.get_resolution()
