@@ -270,9 +270,9 @@ class Point(Annotation):
         """convert the point annotation to neuroglancer json state 
         """        
         if hasattr(self,'description'):
-            point_json = create_point_annotation(self.coord,self.description,type = self._type)
+            point_json = create_point_annotation(list(self.coord),self.description,type = self._type)
         else:
-            point_json = create_point_annotation(self.coord,'',type = self._type)
+            point_json = create_point_annotation(list(self.coord),'',type = self._type)
         if hasattr(self,'category'):
             point_json['category'] = self.category
         return point_json

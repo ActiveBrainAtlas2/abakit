@@ -9,7 +9,9 @@ class UrlGenerator:
     
     def add_stack_image(self,animal,channel,name=None,color = None):
         if name == None:
-            name = animal
+            name = f'{animal}_CH{channel}'
+        if not hasattr(self,'dims'):
+            self.dims = self.controller.get_resolution('DK52')*10^6
         rgb_code = dict(red = 'vec3(pix,0,0)',green = 'vec3(0,pix,0)')
         source = f'precomputed://https://activebrainatlas.ucsd.edu/data/{animal}/neuroglancer_data/C{channel}'
         if color is not None:
@@ -22,7 +24,7 @@ class UrlGenerator:
                             pix = pow(pix,gamma);
 
                             if (colour) {
-                            emitRGB(vec3('''+rgb_code+'''));
+                            emitRGB(vec3('''+rgb_code[color]+'''));
                             } else {
                             emitGrayscale(pix) ;
                             }
@@ -77,11 +79,14 @@ class UrlGenerator:
         return annotation_layer
 
     def get_url(self):
-        return json.dumps({'layers': self.layers})
+        if hasattr(self,'dims'):
+            return json.dumps({"dimensions": {"x": [self.dims[0],"m"],"y": [self.dims[1],"m"],"z": [self.dims[2],"m"]},'layers': self.layers})
+        else:
+            return json.dumps({'layers': self.layers})
     
     def add_to_database(self,title,person_id):
         content = self.get_url()
-        self.controller.add_url(content,title,person_id)
+        return self.controller.add_url(content,title,person_id)
     
     def parse_url(self,url):
         url = json.loads(url.replace('\n',''))

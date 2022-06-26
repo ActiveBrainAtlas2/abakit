@@ -31,6 +31,7 @@ class UrlController(Controller):
         """        
         url = UrlModel(url = content,comments = title,person_id = person_id)
         self.add_row(url)
+        return url.id
 
     def delete_url(self,title,person_id):
         """Deleting a row from the neuroglancer url table
