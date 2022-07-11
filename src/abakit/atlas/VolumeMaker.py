@@ -14,10 +14,10 @@ from django.template import Origin
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage.measurements import center_of_mass
-
+from abakit.atlas.VolumeToContour import average_masks
 class VolumeMaker:
 
-    def calculate_origin_and_volume_for_one_segment(self,segmenti):
+    def calculate_origin_and_volume_for_one_segment(self,segmenti,interpolate=0):
         segment_contours = self.aligned_contours[segmenti]
         segment_contours = self.sort_contours(segment_contours)
         origin,section_size = self.get_origin_and_section_size(segment_contours)
@@ -31,6 +31,8 @@ class VolumeMaker:
             volume.append(volume_slice)
         volume = np.array(volume).astype(np.bool8)
         volume = np.swapaxes(volume,0,2)
+        for _ in range(interpolate):
+            volume,origin = self.interpolate_volumes(volume,origin)
         self.origins[segmenti] = origin
         self.volumes[segmenti] = volume
     
@@ -50,12 +52,12 @@ class VolumeMaker:
         size = np.array([xspan,yspan]).astype(int)+5
         return origin,size
 
-    def compute_origins_and_volumes_for_all_segments(self):
+    def compute_origins_and_volumes_for_all_segments(self,interpolate=0):
         self.origins = {}
         self.volumes = {}
         self.segments = self.aligned_contours.keys()
         for segmenti in tqdm(self.segments):
-            self.calculate_origin_and_volume_for_one_segment(segmenti)
+            self.calculate_origin_and_volume_for_one_segment(segmenti,interpolate=interpolate)
     
     def get_COM_in_pixels(self,structurei):
         com = np.array(center_of_mass(self.volumes[structurei]))
@@ -71,3 +73,16 @@ class VolumeMaker:
     def set_aligned_contours(self,contours):
         self.aligned_contours = contours
         self.structures = list(self.aligned_contours.keys())  
+    
+    def interpolate_volumes(self,volume,origin):
+        nsections = volume.shape[2]
+        origin = np.array(origin)
+        origin = origin*np.array([1,1,2])
+        interpolated = np.zeros((volume.shape[0],volume.shape[1],2*nsections))
+        for sectioni in range(nsections):
+            interpolated[:,:,sectioni*2] = volume[:,:,sectioni]
+            if sectioni > 0:
+                next = interpolated[:,:,sectioni*2]
+                last = interpolated[:,:,sectioni*2-2]
+                interpolated[:,:,sectioni*2-1] = average_masks(next,last)
+        return interpolated,origin

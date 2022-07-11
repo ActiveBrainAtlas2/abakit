@@ -1,7 +1,7 @@
 import os
 from subprocess import Popen, check_output
 import socket
-
+import magic
 
 def get_hostname():
     hostname = socket.gethostname()

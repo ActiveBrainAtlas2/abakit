@@ -42,3 +42,12 @@ class VolumeToContour:
     
     def rotate_volume(self,volume):
         ...
+
+def distance_transform(image):
+    image = np.array(image).astype(np.uint8)
+    return cv2.distanceTransform(image, cv2.DIST_L2, 5)
+
+def average_masks(mask1,mask2):
+    d1 = distance_transform(mask1) - distance_transform(np.logical_not(mask1));   
+    d2 = distance_transform(mask2) - distance_transform(np.logical_not(mask2));   
+    return (d1+d2) > 0; 
