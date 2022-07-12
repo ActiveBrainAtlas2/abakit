@@ -84,7 +84,9 @@ class TasksController(Controller):
                 .one()
             )
         except NoResultFound as nrf:
-            print(f"Bad lookup code for {downsample} {channel} {action} error: {nrf}")
+            print(
+                f"Bad lookup code for {downsample} {channel} {action} error: {nrf}"
+            )
             return 0
 
         return lookup.id
@@ -95,7 +97,9 @@ class TasksController(Controller):
 
     def get_available_actions(self):
         results = (
-            self.session.query(ProgressLookup).filter(ProgressLookup.active == 1).all()
+            self.session.query(ProgressLookup)
+            .filter(ProgressLookup.active == 1)
+            .all()
         )
         for resulti in results:
             print(
@@ -103,7 +107,13 @@ class TasksController(Controller):
             )
 
     def clear_file_log(self, animal):
-        return self.session.query(FileLog).filter(FileLog.prep_id == animal).delete()
+        result = (
+            self.session.query(FileLog)
+            .filter(FileLog.prep_id == animal)
+            .delete()
+        )
+        self.session.commit()
+        return result
 
 
 def file_processed(animal, progress_id, filename, pooledsession):

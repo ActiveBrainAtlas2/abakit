@@ -29,35 +29,47 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 
-from abakit.settings import user,password,host,schema
+from abakit.settings import user, password, host, schema
+
 
 class SqlController(object):
-    """ Create a class for processing the pipeline,
-    """
+    """Create a class for processing the pipeline,"""
 
     def __init__(self, animal, host=host, schema=schema):
-        """ setup the attributes for the SlidesProcessor class
-            Args:
-                animal: object of animal to process
+        """setup the attributes for the SlidesProcessor class
+        Args:
+            animal: object of animal to process
         """
-        
-        self.session,self.pooledsession = self.get_session(host, schema)
+
+        self.session, self.pooledsession = self.get_session(host, schema)
         try:
-            self.animal = self.session.query(Animal).filter(
-                Animal.prep_id == animal).one()
+            self.animal = (
+                self.session.query(Animal)
+                .filter(Animal.prep_id == animal)
+                .one()
+            )
         except NoResultFound:
-            print(f'No animal/brain with the name {animal} was found in the database.')
+            print(
+                f"No animal/brain with the name {animal} was found in the database."
+            )
             sys.exit()
         try:
-            self.histology = self.session.query(Histology).filter(
-                Histology.prep_id == animal).one()
+            self.histology = (
+                self.session.query(Histology)
+                .filter(Histology.prep_id == animal)
+                .one()
+            )
         except NoResultFound:
-            print(f'No histology for {animal}')
+            print(f"No histology for {animal}")
         try:
-            self.scan_run = self.session.query(ScanRun).filter(
-                ScanRun.prep_id == animal).order_by(ScanRun.id.desc()).one()
+            self.scan_run = (
+                self.session.query(ScanRun)
+                .filter(ScanRun.prep_id == animal)
+                .order_by(ScanRun.id.desc())
+                .one()
+            )
         except NoResultFound:
-            print(f'No scan run for {animal}')
+            print(f"No scan run for {animal}")
         self.slides = None
         self.tifs = None
         self.valid_sections = OrderedDict()
@@ -65,16 +77,22 @@ class SqlController(object):
         # self.session.close()
 
     def get_session(self, host, schema):
-        connection_string = f'mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8'
+        connection_string = (
+            f"mysql+pymysql://{user}:{password}@{host}/{schema}?charset=utf8"
+        )
         engine = create_engine(connection_string, echo=False)
         Session = sessionmaker(bind=engine)
         session = Session()
-        pooledengine = create_engine(connection_string, pool_size=10, max_overflow=50, pool_recycle=3600)
-        pooledsession = scoped_session(sessionmaker(bind=pooledengine)) 
-        return session,pooledsession
-    
-    def animal_exists(self,animal):
-        return bool(self.session.query(Animal).filter(Animal.prep_id == animal).first())
+        pooledengine = create_engine(
+            connection_string, pool_size=10, max_overflow=50, pool_recycle=3600
+        )
+        pooledsession = scoped_session(sessionmaker(bind=pooledengine))
+        return session, pooledsession
+
+    def animal_exists(self, animal):
+        return bool(
+            self.session.query(Animal).filter(Animal.prep_id == animal).first()
+        )
 
     def get_animal_list(self):
         results = self.session.query(Animal).all()
@@ -82,13 +100,16 @@ class SqlController(object):
         for resulti in results:
             animals.append(resulti.prep_id)
         return animals
-    
+
     def get_annotated_animals(self):
-        results = self.session.query(AnnotationPoint)\
-            .filter(AnnotationPoint.active.is_(True))\
-            .filter(AnnotationPoint.FK_input_id == 1)\
-            .filter(AnnotationPoint.FK_owner_id == 2)\
-            .filter(AnnotationPoint.label == 'COM').all()
+        results = (
+            self.session.query(AnnotationPoint)
+            .filter(AnnotationPoint.active.is_(True))
+            .filter(AnnotationPoint.FK_input_id == 1)
+            .filter(AnnotationPoint.FK_owner_id == 2)
+            .filter(AnnotationPoint.label == "COM")
+            .all()
+        )
         return np.unique([ri.prep_id for ri in results])
 
     def get_values_from_column(self, query_result):
@@ -123,7 +144,9 @@ class SqlController(object):
 
         Returns: one tif
         """
-        return self.session.query(SlideCziTif).filter(SlideCziTif.id == ID).one()
+        return (
+            self.session.query(SlideCziTif).filter(SlideCziTif.id == ID).one()
+        )
 
     def get_urlModel(self, ID):
         """
@@ -152,19 +175,26 @@ class SqlController(object):
         """
         orderby = self.histology.side_sectioned_first
 
-        if orderby == 'DESC':
-            sections = self.session.query(Section).filter(Section.prep_id == animal)\
-                .filter(Section.channel == channel)\
-                .order_by(Section.slide_physical_id.desc())\
-                .order_by(Section.scene_number.desc()).all()
+        if orderby == "DESC":
+            sections = (
+                self.session.query(Section)
+                .filter(Section.prep_id == animal)
+                .filter(Section.channel == channel)
+                .order_by(Section.slide_physical_id.desc())
+                .order_by(Section.scene_number.desc())
+                .all()
+            )
         else:
-            sections = self.session.query(Section).filter(Section.prep_id == animal)\
-                .filter(Section.channel == channel)\
-                .order_by(Section.slide_physical_id.asc())\
-                .order_by(Section.scene_number.asc()).all()
+            sections = (
+                self.session.query(Section)
+                .filter(Section.prep_id == animal)
+                .filter(Section.channel == channel)
+                .order_by(Section.slide_physical_id.asc())
+                .order_by(Section.scene_number.asc())
+                .all()
+            )
 
         return sections
-
 
     def get_distinct_section_filenames(self, animal, channel):
         """
@@ -179,18 +209,35 @@ class SqlController(object):
         Returns: list of sections with distinct file names
 
         """
-        sections = self.session.query(Section.czi_file, Section.file_name, Section.scene_index,  Section.channel_index).distinct()\
-            .filter(Section.prep_id == animal).filter(
-            Section.channel == channel).all()
+        sections = (
+            self.session.query(
+                Section.czi_file,
+                Section.file_name,
+                Section.scene_index,
+                Section.channel_index,
+            )
+            .distinct()
+            .filter(Section.prep_id == animal)
+            .filter(Section.channel == channel)
+            .all()
+        )
 
         return sections
 
     def get_slide_czi_to_tifs(self, channel):
-        slides = self.session.query(Slide).filter(Slide.scan_run_id == self.scan_run.id)\
-            .filter(Slide.slide_status == 'Good').all()
-        slide_czi_to_tifs = self.session.query(SlideCziTif).filter(SlideCziTif.channel == channel)\
-            .filter(SlideCziTif.slide_id.in_([slide.id for slide in slides]))\
-            .filter(SlideCziTif.active == 1).all()
+        slides = (
+            self.session.query(Slide)
+            .filter(Slide.scan_run_id == self.scan_run.id)
+            .filter(Slide.slide_status == "Good")
+            .all()
+        )
+        slide_czi_to_tifs = (
+            self.session.query(SlideCziTif)
+            .filter(SlideCziTif.channel == channel)
+            .filter(SlideCziTif.slide_id.in_([slide.id for slide in slides]))
+            .filter(SlideCziTif.active == 1)
+            .all()
+        )
 
         return slide_czi_to_tifs
 
@@ -199,16 +246,26 @@ class SqlController(object):
             self.session.merge(row)
             self.session.commit()
         except Exception as e:
-            print(f'No merge for  {e}')
+            print(f"No merge for  {e}")
             self.session.rollback()
 
     def update_scanrun(self, id):
-        width = self.session.query(func.max(SlideCziTif.width)).join(Slide).join(ScanRun)\
-            .filter(SlideCziTif.active == True) \
-            .filter(ScanRun.id == id).scalar()
-        height = self.session.query(func.max(SlideCziTif.height)).join(Slide).join(ScanRun)\
-            .filter(SlideCziTif.active == True) \
-            .filter(ScanRun.id == id).scalar()
+        width = (
+            self.session.query(func.max(SlideCziTif.width))
+            .join(Slide)
+            .join(ScanRun)
+            .filter(SlideCziTif.active == True)
+            .filter(ScanRun.id == id)
+            .scalar()
+        )
+        height = (
+            self.session.query(func.max(SlideCziTif.height))
+            .join(Slide)
+            .join(ScanRun)
+            .filter(SlideCziTif.active == True)
+            .filter(ScanRun.id == id)
+            .scalar()
+        )
         SAFEMAX = 10000
         LITTLE_BIT_MORE = 500
         # just to be safe, we don't want to update numbers that aren't realistic
@@ -220,24 +277,30 @@ class SqlController(object):
             # width and height get flipped
             try:
                 self.session.query(ScanRun).filter(ScanRun.id == id).update(
-                    {'width': height, 'height': width})
+                    {"width": height, "height": width}
+                )
                 self.session.commit()
             except Exception as e:
-                print(f'No merge for  {e}')
+                print(f"No merge for  {e}")
                 self.session.rollback()
 
     def update_tif(self, id, width, height):
         try:
             self.session.query(SlideCziTif).filter(
-                SlideCziTif.id == id).update({'width': width, 'height': height})
+                SlideCziTif.id == id
+            ).update({"width": width, "height": height})
             self.session.commit()
         except Exception as e:
-            print(f'No merge for  {e}')
+            print(f"No merge for  {e}")
             self.session.rollback()
 
     def get_sections_numbers(self, animal):
-        sections = self.session.query(Section).filter(
-            Section.prep_id == animal).filter(Section.channel == 1).all()
+        sections = (
+            self.session.query(Section)
+            .filter(Section.prep_id == animal)
+            .filter(Section.channel == 1)
+            .all()
+        )
 
         section_numbers = []
         for i, r in enumerate(sections):
@@ -246,12 +309,16 @@ class SqlController(object):
         return section_numbers
 
     def get_sections_dict(self, animal):
-        sections = self.session.query(Section).filter(
-            Section.prep_id == animal).filter(Section.channel == 1).all()
+        sections = (
+            self.session.query(Section)
+            .filter(Section.prep_id == animal)
+            .filter(Section.channel == 1)
+            .all()
+        )
 
         sections_dict = {}
         for i, r in enumerate(sections):
-            sections_dict[i] = str(i).zfill(3) + 'tif'
+            sections_dict[i] = str(i).zfill(3) + "tif"
 
         return sections_dict
 
@@ -262,20 +329,32 @@ class SqlController(object):
         :param abbrv: the abbreviation of the structure
         :return: structure object
         """
-        return self.session.query(BrainRegion).filter(BrainRegion.abbreviation == func.binary(abbrv)).one()
-    
-    def get_annotation_point(self,search_dictionary):
+        return (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.abbreviation == func.binary(abbrv))
+            .one()
+        )
+
+    def get_annotation_point(self, search_dictionary):
         query_start = self.session.query(AnnotationPoint)
         for key, value in search_dictionary.items():
-            query_start = eval(f'query_start.filter(AnnotationPoint.{key}=="{value}")')
+            query_start = eval(
+                f'query_start.filter(AnnotationPoint.{key}=="{value}")'
+            )
         return self.get_coordinates_from_query_result(query_start.all())
 
-    def get_coordinates_from_query_result(self,query_result):
+    def get_coordinates_from_query_result(self, query_result):
         coord = []
         resolution = self.scan_run.resolution
         for resulti in query_result:
-            coord.append([resulti.x/resolution,resulti.y/resolution,int(resulti.z/20)])
-        return(np.array(coord))
+            coord.append(
+                [
+                    resulti.x / resolution,
+                    resulti.y / resolution,
+                    int(resulti.z / 20),
+                ]
+            )
+        return np.array(coord)
 
     def get_structure_color(self, abbrv):
         """
@@ -284,8 +363,11 @@ class SqlController(object):
         :param abbrv: the abbreviation of the structure
         :return: tuple of rgb
         """
-        row = self.session.query(BrainRegion).filter(
-            BrainRegion.abbreviation == func.binary(abbrv)).one()
+        row = (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.abbreviation == func.binary(abbrv))
+            .one()
+        )
         return int(row.color)
 
     def get_structure_color_rgb(self, abbrv):
@@ -295,30 +377,47 @@ class SqlController(object):
         :param abbrv: the abbreviation of the structure
         :return: tuple of rgb
         """
-        row = self.session.query(BrainRegion).filter(
-            BrainRegion.abbreviation == func.binary(abbrv)).one()
+        row = (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.abbreviation == func.binary(abbrv))
+            .one()
+        )
         hexa = row.hexadecimal
-        h = hexa.lstrip('#')
-        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+        h = hexa.lstrip("#")
+        return tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
 
     def get_structures(self):
-        return self.session.query(BrainRegion).filter(BrainRegion.active.is_(True)).all()
+        return (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.active.is_(True))
+            .all()
+        )
 
     def get_structures_dict(self):
-        rows = self.session.query(BrainRegion)\
-            .filter(BrainRegion.abbreviation != 'R')\
-            .filter(BrainRegion.is_structure ==1).filter(
-            BrainRegion.active.is_(True)).all()
+        rows = (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.abbreviation != "R")
+            .filter(BrainRegion.is_structure == 1)
+            .filter(BrainRegion.active.is_(True))
+            .all()
+        )
         structures_dict = {}
         for structure in rows:
             structures_dict[structure.abbreviation] = [
-                structure.description, structure.color]
+                structure.description,
+                structure.color,
+            ]
         return structures_dict
 
     def get_structures_list(self):
-        rows = self.session.query(BrainRegion).filter(BrainRegion.id<52)\
-                .filter(BrainRegion.abbreviation != 'R').filter(BrainRegion.active.is_(
-            True)).order_by(BrainRegion.abbreviation.asc()).all()
+        rows = (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.id < 52)
+            .filter(BrainRegion.abbreviation != "R")
+            .filter(BrainRegion.active.is_(True))
+            .order_by(BrainRegion.abbreviation.asc())
+            .all()
+        )
         structures = []
         for structure in rows:
             structures.append(structure.abbreviation)
@@ -330,8 +429,11 @@ class SqlController(object):
         Not sure when/if this is needed, but will only return sided structures
         :return: list of structures that are not singules
         """
-        rows = self.session.query(BrainRegion).filter(
-            BrainRegion.active.is_(True)).all()
+        rows = (
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.active.is_(True))
+            .all()
+        )
         structures = []
         for structure in rows:
             if "_" in structure.abbreviation:
@@ -341,7 +443,12 @@ class SqlController(object):
 
     def get_section_count(self, animal):
         try:
-            count = self.session.query(Section).filter(Section.prep_id == animal).filter(Section.channel == 1).count()
+            count = (
+                self.session.query(Section)
+                .filter(Section.prep_id == animal)
+                .filter(Section.channel == 1)
+                .count()
+            )
         except:
             count = 666
         return count
@@ -349,17 +456,24 @@ class SqlController(object):
     def get_current_task(self, animal):
         step = None
         try:
-            lookup_id = self.session.query(func.max(Task.lookup_id)).filter(Task.prep_id == animal) \
-                .filter(Task.completed.is_(True)).scalar()
+            lookup_id = (
+                self.session.query(func.max(Task.lookup_id))
+                .filter(Task.prep_id == animal)
+                .filter(Task.completed.is_(True))
+                .scalar()
+            )
         except NoResultFound as nrf:
-            print('No results for {} error: {}'.format(animal, nrf))
+            print("No results for {} error: {}".format(animal, nrf))
             return step
 
         try:
-            lookup = self.session.query(ProgressLookup).filter(
-                ProgressLookup.id == lookup_id).one()
+            lookup = (
+                self.session.query(ProgressLookup)
+                .filter(ProgressLookup.id == lookup_id)
+                .one()
+            )
         except NoResultFound as nrf:
-            print('Bad lookup code for {} error: {}'.format(lookup_id, nrf))
+            print("Bad lookup code for {} error: {}".format(lookup_id, nrf))
             return step
 
         return lookup.description
@@ -375,35 +489,51 @@ class SqlController(object):
             nothing, just merges
         """
         try:
-            lookup = self.session.query(ProgressLookup) \
-                .filter(ProgressLookup.id == lookup_id) \
-                .limit(1).one()
+            lookup = (
+                self.session.query(ProgressLookup)
+                .filter(ProgressLookup.id == lookup_id)
+                .limit(1)
+                .one()
+            )
         except NoResultFound:
-            print('No lookup for {} so we will enter one.'.format(lookup_id))
+            print("No lookup for {} so we will enter one.".format(lookup_id))
         try:
-            task = self.session.query(Task).filter(Task.lookup_id == lookup.id) \
-                .filter(Task.prep_id == animal).one()
+            task = (
+                self.session.query(Task)
+                .filter(Task.lookup_id == lookup.id)
+                .filter(Task.prep_id == animal)
+                .one()
+            )
         except NoResultFound:
-            print('No step for {}, so creating new task.'.format(lookup_id))
+            print("No step for {}, so creating new task.".format(lookup_id))
             task = Task(animal, lookup.id, True)
 
         try:
             self.session.merge(task)
             self.session.commit()
         except:
-            print('Bad lookup code for {}'.format(lookup.id))
+            print("Bad lookup code for {}".format(lookup.id))
             self.session.rollback()
-    
-    def structure_abbreviation_to_id(self,abbreviation):
+
+    def structure_abbreviation_to_id(self, abbreviation):
         try:
             structure = self.get_structure(str(abbreviation).strip())
         except NoResultFound as nrf:
-            print(f'No structure found for {abbreviation} {nrf}')
+            print(f"No structure found for {abbreviation} {nrf}")
             return
         return structure.id
 
-    def add_annotation_point(self, abbreviation, animal, label, x, y, section, 
-                       person_id, input_type_id):
+    def add_annotation_point(
+        self,
+        abbreviation,
+        animal,
+        label,
+        x,
+        y,
+        section,
+        person_id,
+        input_type_id,
+    ):
         """
         Look up the structure id from the structure.
         Args:
@@ -422,21 +552,32 @@ class SqlController(object):
         """
 
         structure_id = self.structure_abbreviation_to_id(abbreviation)
-        coordinates = (x,y,section)
-        self.add_annotation_point_row(animal,person_id,input_type_id,coordinates,structure_id,label)
+        coordinates = (x, y, section)
+        self.add_annotation_point_row(
+            animal, person_id, input_type_id, coordinates, structure_id, label
+        )
 
-    def get_com_dict(self, prep_id, input_type_id=1, person_id=2,active = True):
-        return self.get_annotation_point_entry( prep_id = prep_id, input_type_id=input_type_id,\
-             person_id=person_id,active = active,label = 'COM')
-    
-    def get_annotation_point_entry(self, prep_id, input_type_id=1, person_id=2,active = True,label = 'COM'):
-        rows = self.session.query(AnnotationPoint)\
-            .filter(AnnotationPoint.active.is_(active))\
-            .filter(AnnotationPoint.prep_id == prep_id)\
-            .filter(AnnotationPoint.FK_input_id == input_type_id)\
-            .filter(AnnotationPoint.FK_owner_id == person_id)\
-            .filter(AnnotationPoint.label == label)\
+    def get_com_dict(self, prep_id, input_type_id=1, person_id=2, active=True):
+        return self.get_annotation_point_entry(
+            prep_id=prep_id,
+            input_type_id=input_type_id,
+            person_id=person_id,
+            active=active,
+            label="COM",
+        )
+
+    def get_annotation_point_entry(
+        self, prep_id, input_type_id=1, person_id=2, active=True, label="COM"
+    ):
+        rows = (
+            self.session.query(AnnotationPoint)
+            .filter(AnnotationPoint.active.is_(active))
+            .filter(AnnotationPoint.prep_id == prep_id)
+            .filter(AnnotationPoint.FK_input_id == input_type_id)
+            .filter(AnnotationPoint.FK_owner_id == person_id)
+            .filter(AnnotationPoint.label == label)
             .all()
+        )
         row_dict = {}
         for row in rows:
             structure = row.structure.abbreviation
@@ -446,7 +587,7 @@ class SqlController(object):
     def get_atlas_centers(self):
         PERSON_ID_LAUREN = 16
         INPUT_TYPE_MANUAL = 1
-        return self.get_com_dict('Atlas',INPUT_TYPE_MANUAL,PERSON_ID_LAUREN)
+        return self.get_com_dict("Atlas", INPUT_TYPE_MANUAL, PERSON_ID_LAUREN)
 
     def get_point_dataframe(self, id):
         """
@@ -458,28 +599,29 @@ class SqlController(object):
         """
 
         try:
-            urlModel = self.session.query(
-                UrlModel).filter(UrlModel.id == id).one()
+            urlModel = (
+                self.session.query(UrlModel).filter(UrlModel.id == id).one()
+            )
         except NoResultFound as nrf:
-            print('Bad ID for {} error: {}'.format(id, nrf))
+            print("Bad ID for {} error: {}".format(id, nrf))
             return
 
         result = None
         dfs = []
         if urlModel.url is not None:
             json_txt = json.loads(urlModel.url)
-            layers = json_txt['layers']
+            layers = json_txt["layers"]
             for l in layers:
-                if 'annotations' in l:
-                    name = l['name']
-                    annotation = l['annotations']
-                    d = [row['point'] for row in annotation]
-                    df = pd.DataFrame(d, columns=['X', 'Y', 'Section'])
-                    df['X'] = df['X'].astype(int)
-                    df['Y'] = df['Y'].astype(int)
-                    df['Section'] = df['Section'].astype(int)
-                    df['Layer'] = name
-                    df = df[['Layer', 'X', 'Y', 'Section']]
+                if "annotations" in l:
+                    name = l["name"]
+                    annotation = l["annotations"]
+                    d = [row["point"] for row in annotation]
+                    df = pd.DataFrame(d, columns=["X", "Y", "Section"])
+                    df["X"] = df["X"].astype(int)
+                    df["Y"] = df["Y"].astype(int)
+                    df["Section"] = df["Section"].astype(int)
+                    df["Layer"] = name
+                    df = df[["Layer", "X", "Y", "Section"]]
                     dfs.append(df)
             if len(dfs) == 0:
                 result = None
@@ -493,106 +635,180 @@ class SqlController(object):
     def get_progress_id(self, downsample, channel, action):
 
         try:
-            lookup = self.session.query(ProgressLookup) \
-                .filter(ProgressLookup.downsample == downsample) \
-                .filter(ProgressLookup.channel == channel) \
-                .filter(ProgressLookup.action == action).one()
+            lookup = (
+                self.session.query(ProgressLookup)
+                .filter(ProgressLookup.downsample == downsample)
+                .filter(ProgressLookup.channel == channel)
+                .filter(ProgressLookup.action == action)
+                .one()
+            )
         except NoResultFound as nrf:
             print(
-                f'Bad lookup code for {downsample} {channel} {action} error: {nrf}')
+                f"Bad lookup code for {downsample} {channel} {action} error: {nrf}"
+            )
             return 0
 
         return lookup.id
 
     def check_elastix_row(self, animal, section):
-        row_exists = bool(self.session.query(ElastixTransformation).filter(
-            ElastixTransformation.prep_id == animal,
-            ElastixTransformation.section == section).first())
+        row_exists = bool(
+            self.session.query(ElastixTransformation)
+            .filter(
+                ElastixTransformation.prep_id == animal,
+                ElastixTransformation.section == section,
+            )
+            .first()
+        )
         return row_exists
 
-    def add_row(self,data):
+    def add_row(self, data):
         try:
             self.session.add(data)
             self.session.commit()
         except Exception as e:
-            print(f'No merge {e}')
+            print(f"No merge {e}")
             self.session.rollback()
-    
-    def structure_exists(self,structurei):
-        return bool(self.session.query(BrainRegion).filter(BrainRegion.abbreviation==structurei).first())
-        
-    def add_url(self,content,title,person_id):
-        url = UrlModel(url = content,comments = title,person_id = person_id)
+
+    def structure_exists(self, structurei):
+        return bool(
+            self.session.query(BrainRegion)
+            .filter(BrainRegion.abbreviation == structurei)
+            .first()
+        )
+
+    def add_url(self, content, title, person_id):
+        url = UrlModel(url=content, comments=title, person_id=person_id)
         self.add_row(url)
 
-    def delete_url(self,title,person_id):
-        self.session.query(UrlModel)\
-            .filter(UrlModel.comments == title)\
-            .filter(UrlModel.person_id == person_id).delete()
+    def delete_url(self, title, person_id):
+        self.session.query(UrlModel).filter(UrlModel.comments == title).filter(
+            UrlModel.person_id == person_id
+        ).delete()
         self.session.commit()
 
     def add_elastix_row(self, animal, section, rotation, xshift, yshift):
         data = ElastixTransformation(
-            prep_id=animal, section=section, rotation=rotation, xshift=xshift, yshift=yshift,
-            created=datetime.utcnow(), active=True)
+            prep_id=animal,
+            section=section,
+            rotation=rotation,
+            xshift=xshift,
+            yshift=yshift,
+            created=datetime.utcnow(),
+            active=True,
+        )
         self.add_row(data)
 
-    def add_annotation_point_row(self,animal,person_id,input_type_id,coordinates,structure_id,label):
-        x,y,z = coordinates
-        data = AnnotationPoint(prep_id = animal, FK_owner_id = person_id, FK_input_id = input_type_id, x=x, y=y, \
-            section=z,FK_structure_id=structure_id,label=label)
+    def add_annotation_point_row(
+        self,
+        animal,
+        person_id,
+        input_type_id,
+        coordinates,
+        structure_id,
+        label,
+    ):
+        x, y, z = coordinates
+        data = AnnotationPoint(
+            prep_id=animal,
+            FK_owner_id=person_id,
+            FK_input_id=input_type_id,
+            x=x,
+            y=y,
+            section=z,
+            FK_structure_id=structure_id,
+            label=label,
+        )
         self.add_row(data)
-    
-    def add_com(self, prep_id, abbreviation, coordinates, person_id=2 , input_type_id = 1):
+
+    def add_com(
+        self, prep_id, abbreviation, coordinates, person_id=2, input_type_id=1
+    ):
         structure_id = self.structure_abbreviation_to_id(abbreviation)
-        if self.annotation_point_row_exists(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
-            structure_id = structure_id,layer = 'COM'):
-            self.delete_annotation_point_row(animal=prep_id,person_id = person_id,input_type_id = input_type_id,\
-                structure_id = structure_id,layer = 'COM')
-        self.add_annotation_point_row(animal = prep_id,person_id = person_id,input_type_id = input_type_id,\
-            coordinates = coordinates,structure_id = structure_id,layer = 'COM')
-    
-    def url_exists(self,comments):
-        row_exists = bool(self.session.query(UrlModel).filter(UrlModel.comments == comments).first())
+        if self.annotation_point_row_exists(
+            animal=prep_id,
+            person_id=person_id,
+            input_type_id=input_type_id,
+            structure_id=structure_id,
+            layer="COM",
+        ):
+            self.delete_annotation_point_row(
+                animal=prep_id,
+                person_id=person_id,
+                input_type_id=input_type_id,
+                structure_id=structure_id,
+                layer="COM",
+            )
+        self.add_annotation_point_row(
+            animal=prep_id,
+            person_id=person_id,
+            input_type_id=input_type_id,
+            coordinates=coordinates,
+            structure_id=structure_id,
+            layer="COM",
+        )
+
+    def url_exists(self, comments):
+        row_exists = bool(
+            self.session.query(UrlModel)
+            .filter(UrlModel.comments == comments)
+            .first()
+        )
         return row_exists
 
-    def annotation_point_row_exists(self,animal, person_id, input_type_id, structure_id, label):
-        row_exists = bool(self.session.query(AnnotationPoint).filter(
-            AnnotationPoint.prep_id == animal, 
-            AnnotationPoint.FK_owner_id == person_id, 
-            AnnotationPoint.FK_input_id == input_type_id, 
-            AnnotationPoint.FK_structure_id == structure_id,
-            AnnotationPoint.label == label).first())
+    def annotation_point_row_exists(
+        self, animal, person_id, input_type_id, structure_id, label
+    ):
+        row_exists = bool(
+            self.session.query(AnnotationPoint)
+            .filter(
+                AnnotationPoint.prep_id == animal,
+                AnnotationPoint.FK_owner_id == person_id,
+                AnnotationPoint.FK_input_id == input_type_id,
+                AnnotationPoint.FK_structure_id == structure_id,
+                AnnotationPoint.label == label,
+            )
+            .first()
+        )
         return row_exists
- 
-    def delete_annotation_point_row(self,animal,person_id,input_type_id,structure_id,label):
-        self.session.query(AnnotationPoint)\
-            .filter(AnnotationPoint.active.is_(True))\
-            .filter(AnnotationPoint.prep_id == animal)\
-            .filter(AnnotationPoint.FK_input_id == input_type_id)\
-            .filter(AnnotationPoint.FK_owner_id == person_id)\
-            .filter(AnnotationPoint.FK_structure_id == structure_id)\
-            .filter(AnnotationPoint.label == label).delete()
+
+    def delete_annotation_point_row(
+        self, animal, person_id, input_type_id, structure_id, label
+    ):
+        self.session.query(AnnotationPoint).filter(
+            AnnotationPoint.active.is_(True)
+        ).filter(AnnotationPoint.prep_id == animal).filter(
+            AnnotationPoint.FK_input_id == input_type_id
+        ).filter(
+            AnnotationPoint.FK_owner_id == person_id
+        ).filter(
+            AnnotationPoint.FK_structure_id == structure_id
+        ).filter(
+            AnnotationPoint.label == label
+        ).delete()
         self.session.commit()
 
     def clear_elastix(self, animal):
-        self.session.query(ElastixTransformation).filter(ElastixTransformation.prep_id == animal)\
-            .delete()
+        self.session.query(ElastixTransformation).filter(
+            ElastixTransformation.prep_id == animal
+        ).delete()
 
-    def convert_coordinate_pixel_to_microns(self,coordinates):
+    def convert_coordinate_pixel_to_microns(self, coordinates):
         resolution = self.scan_run.resolution
         self.session.close()
-        x,y,z = coordinates
-        x*=resolution
-        y*=resolution
-        z*=20
-        return x,y,z
-    
-    def set_task_for_step(self,animal,downsample,channel,step):
+        x, y, z = coordinates
+        x *= resolution
+        y *= resolution
+        z *= 20
+        return x, y, z
+
+    def set_task_for_step(self, animal, downsample, channel, step):
         progress_id = self.get_progress_id(downsample, channel, step)
         self.set_task(animal, progress_id)
-    
-        
+
+
+    def clear_file_log(self, animal):
+        return self.session.query(FileLog).filter(FileLog.prep_id == animal).delete()
+
 
 def file_processed(animal, progress_id, filename):
     """
@@ -604,16 +820,20 @@ def file_processed(animal, progress_id, filename):
         boolean if file exists or not
     """
     try:
-        file_log = pooledsession.query(FileLog) \
-            .filter(FileLog.prep_id == animal) \
-            .filter(FileLog.progress_id == progress_id) \
-            .filter(FileLog.filename == filename).one()
+        file_log = (
+            pooledsession.query(FileLog)
+            .filter(FileLog.prep_id == animal)
+            .filter(FileLog.progress_id == progress_id)
+            .filter(FileLog.filename == filename)
+            .one()
+        )
     except NoResultFound as nrf:
         return False
     finally:
         pooledsession.close()
 
     return True
+
 
 def set_file_completed(animal, progress_id, filename):
     """
@@ -625,19 +845,19 @@ def set_file_completed(animal, progress_id, filename):
         nothing, just merges
     """
 
-    file_log = FileLog(prep_id=animal, progress_id=progress_id, filename=filename,
-                       created=datetime.utcnow(), active=True)
+    file_log = FileLog(
+        prep_id=animal,
+        progress_id=progress_id,
+        filename=filename,
+        created=datetime.utcnow(),
+        active=True,
+    )
 
     try:
         pooledsession.add(file_log)
         pooledsession.commit()
     except Exception as e:
-        print(f'No merge for {animal} {filename} {e}')
+        print(f"No merge for {animal} {filename} {e}")
         pooledsession.rollback()
     finally:
         pooledsession.close()
-
-
-
-    
-
